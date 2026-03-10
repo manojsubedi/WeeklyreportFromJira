@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GME BIZ — Development Status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════ RESET + VARS ═══════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:       #0D1B4E;
+  --navy-mid:   #152060;
+  --navy-light: #1E2E7A;
+  --blue:       #2563EB;
+  --blue-light: #3B82F6;
+  --blue-pale:  #EFF6FF;
+  --green:      #059669;
+  --green-pale: #ECFDF5;
+  --orange:     #D97706;
+  --orange-pale:#FFFBEB;
+  --red:        #DC2626;
+  --red-pale:   #FEF2F2;
+  --indigo:     #4F46E5;
+  --surface:    #F8FAFC;
+  --white:      #FFFFFF;
+  --border:     #E2E8F0;
+  --text:       #1E293B;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+  --sidebar-w:  240px;
+  --topbar-h:   64px;
+  --font-head:  'Outfit', sans-serif;
+  --font-body:  'IBM Plex Sans', sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+  --radius:     10px;
+  --shadow:     0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.05);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,.12);
+}
+
+html,body{height:100%;font-family:var(--font-body);background:var(--surface);color:var(--text);font-size:14px;}
+
+/* ═══════ LAYOUT ═════════════════════════════════════════════════════ */
+.app        { display:flex; height:100vh; overflow:hidden; }
+.sidebar    { width:var(--sidebar-w); background:var(--navy); display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; position:relative; z-index:50; }
+.main       { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.topbar     { height:var(--topbar-h); background:var(--white); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; padding:0 24px; flex-shrink:0; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.content    { flex:1; overflow-y:auto; padding:24px; }
+
+/* ═══════ SIDEBAR ════════════════════════════════════════════════════ */
+.sidebar::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.015) 0,rgba(255,255,255,.015) 1px,transparent 1px,transparent 10px);
+  pointer-events:none;
+}
+.sb-logo { padding:20px 20px 16px; border-bottom:1px solid rgba(255,255,255,.08); }
+.sb-logo-mark { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+.sb-logo-icon {
+  width:36px;height:36px;background:linear-gradient(135deg,var(--blue),#818CF8);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:800;color:#fff;font-family:var(--font-head);
+  box-shadow:0 2px 8px rgba(37,99,235,.4);
+}
+.sb-logo-text { font-family:var(--font-head); color:#fff; font-weight:700; font-size:15px; line-height:1.2; }
+.sb-logo-sub  { color:rgba(255,255,255,.4); font-size:10px; margin-top:4px; font-family:var(--font-mono); letter-spacing:.05em; }
+
+.sb-nav { flex:1; padding:16px 0; overflow-y:auto; }
+.sb-section-label { color:rgba(255,255,255,.3); font-size:9.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; padding:0 20px 6px; margin-top:12px; }
+.sb-link {
+  display:flex;align-items:center;gap:10px;padding:9px 20px;color:rgba(255,255,255,.65);
+  font-size:13px;font-weight:500;cursor:pointer;transition:.15s;border-left:3px solid transparent;
+  text-decoration:none;
+}
+.sb-link:hover { background:rgba(255,255,255,.06);color:#fff; }
+.sb-link.active { background:rgba(37,99,235,.2);color:#fff;border-left-color:var(--blue-light); }
+.sb-link .ic { width:17px;text-align:center;font-size:14px;flex-shrink:0; }
+.sb-link .badge { margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;font-family:var(--font-mono); }
+.sb-link .badge.red { background:rgba(220,38,38,.3);color:#FCA5A5; }
+
+.sb-footer { padding:16px 20px; border-top:1px solid rgba(255,255,255,.08); }
+.sb-status-dot { width:7px;height:7px;border-radius:50%;background:#34D399;display:inline-block;margin-right:6px;animation:pulse 2s infinite; }
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
+.sb-status-text { font-size:11px;color:rgba(255,255,255,.5); }
+.sb-date { font-size:10px;color:rgba(255,255,255,.3);margin-top:4px;font-family:var(--font-mono); }
+
+/* ═══════ TOPBAR ══════════════════════════════════════════════════════ */
+.topbar-title { font-family:var(--font-head);font-size:17px;font-weight:700;color:var(--navy);margin-right:auto; }
+.topbar-sub   { font-size:11px;color:var(--text-muted);margin-top:1px; }
+.topbar-title-wrap { display:flex;flex-direction:column; }
+
+.btn { display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s;font-family:var(--font-body);white-space:nowrap; }
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.btn-primary { background:var(--blue);color:#fff; }
+.btn-primary:hover:not(:disabled){ background:#1D4ED8; }
+.btn-dark    { background:var(--navy);color:#fff; }
+.btn-dark:hover:not(:disabled){ background:var(--navy-mid); }
+.btn-green   { background:#065F46;color:#fff; }
+.btn-green:hover:not(:disabled){ background:#047857; }
+.btn-ghost   { background:transparent;color:var(--text-muted);border:1px solid var(--border); }
+.btn-ghost:hover{ background:var(--surface);color:var(--text); }
+.btn-purple  { background:#5B21B6;color:#fff; }
+.btn-purple:hover{ background:#4C1D95; }
+.btn-file    { position:relative;overflow:hidden; }
+.btn-file input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;} 
+
+/* ═══════ SYNC BADGE ═════════════════════════════════════════════════ */
+.sync-badge { display:none;align-items:center;gap:6px;background:var(--green-pale);border:1px solid #6EE7B7;color:#065F46;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600; }
+
+/* ═══════ STATUS BAR ═════════════════════════════════════════════════ */
+.status-bar { display:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;margin-bottom:16px;border-left:3px solid; }
+.status-bar.loading { display:flex;align-items:center;gap:8px;background:#EFF6FF;color:#1D4ED8;border-color:#2563EB; }
+.status-bar.error   { display:block;background:var(--red-pale);color:#991B1B;border-color:var(--red); }
+.status-bar.success { display:block;background:var(--green-pale);color:#065F46;border-color:var(--green); }
+.status-bar.warn    { display:block;background:var(--orange-pale);color:#92400E;border-color:var(--orange); }
+.spinner { width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#2563EB;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0; }
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══════ KPI CARDS ══════════════════════════════════════════════════ */
+.kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px; }
+.kpi-card {
+  background:var(--white);border-radius:var(--radius);border:1px solid var(--border);
+  padding:18px 20px;display:flex;align-items:flex-start;gap:14px;
+  box-shadow:var(--shadow);transition:.2s;position:relative;overflow:hidden;
+}
+.kpi-card::before { content:'';position:absolute;left:0;top:0;bottom:0;width:4px; }
+.kpi-card.blue::before   { background:linear-gradient(to bottom,#2563EB,#818CF8); }
+.kpi-card.green::before  { background:linear-gradient(to bottom,#059669,#34D399); }
+.kpi-card.orange::before { background:linear-gradient(to bottom,#D97706,#FCD34D); }
+.kpi-card.red::before    { background:linear-gradient(to bottom,#DC2626,#F87171); }
+.kpi-icon { width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0; }
+.kpi-icon.blue   { background:#EFF6FF; }
+.kpi-icon.green  { background:var(--green-pale); }
+.kpi-icon.orange { background:var(--orange-pale); }
+.kpi-icon.red    { background:var(--red-pale); }
+.kpi-body { flex:1;min-width:0; }
+.kpi-label { font-size:11.5px;color:var(--text-muted);font-weight:500;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em; }
+.kpi-value { font-family:var(--font-head);font-size:28px;font-weight:700;color:var(--text);line-height:1; }
+.kpi-sub   { font-size:11px;color:var(--text-light);margin-top:4px; }
+
+/* Progress ring */
+.kpi-ring { position:relative;width:44px;height:44px;flex-shrink:0; }
+.kpi-ring svg { transform:rotate(-90deg); }
+.kpi-ring-text { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text); }
+
+/* ═══════ REPORT PANEL ═══════════════════════════════════════════════ */
+.report-panel { background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow); }
+.panel-header { padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
+.panel-title  { font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--navy);margin-right:auto; }
+
+/* ═══════ TABS ════════════════════════════════════════════════════════ */
+.tabs { display:flex;gap:4px;padding:0 20px;border-bottom:1px solid var(--border);background:var(--surface); }
+.tab-btn {
+  padding:11px 20px;font-size:13px;font-weight:600;color:var(--text-muted);
+  background:transparent;border:none;border-bottom:2px solid transparent;
+  cursor:pointer;transition:.15s;font-family:var(--font-body);white-space:nowrap;margin-bottom:-1px;
+}
+.tab-btn:hover { color:var(--text); }
+.tab-btn.active { color:var(--blue);border-bottom-color:var(--blue); }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+/* ═══════ LEGEND ═════════════════════════════════════════════════════ */
+.legend { display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border); }
+.leg-item { display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--text-muted); }
+.leg-dot { width:12px;height:12px;border-radius:3px;flex-shrink:0; }
+.leg-done { background:#059669; }
+.leg-prog { background:#D97706; }
+.leg-plan { background:#FCD34D;border:1px solid #F59E0B; }
+
+/* ═══════ GANTT TABLE ════════════════════════════════════════════════ */
+.table-wrap { overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 340px); }
+table.report { width:100%;border-collapse:collapse;font-size:10.5px; }
+table.report th { padding:5px 4px;border:1px solid rgba(255,255,255,.15);text-align:center;font-family:var(--font-head);font-weight:600;white-space:nowrap;position:sticky;top:0;z-index:5; }
+.h-top    { background:var(--navy); color:#fff; }
+.h-top th { padding:6px 4px;border:1px solid rgba(255,255,255,.12);font-size:10.5px; }
+.h-week   { background:var(--navy-light); }
+.h-week th{ padding:3px 2px;font-size:8.5px;color:#C7D2FE;border:1px solid rgba(255,255,255,.1); }
+.h-week th.cur { background:#1D4ED8;color:#fff; }
+table.report tbody td { padding:5px 5px;border:1px solid var(--border);vertical-align:middle; }
+table.report tbody tr:nth-child(even) { background:#F8FAFC; }
+table.report tbody tr:hover td { background:#EFF6FF; }
+td.no   { text-align:center;font-weight:700;color:var(--navy);font-family:var(--font-head);font-size:12px; }
+td.proj { font-weight:700;color:var(--navy);text-align:center;font-size:11px;line-height:1.5;font-family:var(--font-head); }
+td.desc { font-size:10px;color:var(--text-muted);line-height:1.5;max-width:180px; }
+td.task { font-size:10.5px;line-height:1.4; }
+td.pct  { text-align:center;font-weight:700;font-size:11px;font-family:var(--font-head); }
+td.date { text-align:center;font-size:10px;white-space:nowrap;font-family:var(--font-mono); }
+td.note { text-align:center;font-size:10px;color:var(--text-light);font-style:italic; }
+.ticket { font-size:9px;color:var(--text-light);font-family:var(--font-mono);display:block;margin-top:2px; }
+.wc { width:26px;min-width:26px;max-width:26px;text-align:center;padding:2px 1px;font-size:8px;font-weight:700; }
+.wc.empty { background:transparent;color:transparent; }
+.wc.done  { background:#059669;color:#fff;border-radius:2px; }
+.wc.prog  { background:#D97706;color:#fff;border-radius:2px; }
+.wc.plan  { background:#FDE68A;color:#92400E;border-radius:2px; }
+.wc.cur   { outline:2px solid #2563EB;outline-offset:-2px;border-radius:2px; }
+.ov-wrap  { padding:2px 4px;text-align:center;min-width:70px; }
+.ov-bg    { background:#E2E8F0;border-radius:3px;height:6px;margin-bottom:3px; }
+.ov-fill  { height:6px;border-radius:3px;transition:.3s; }
+.summary-row td { background:#EEF2FF !important;font-weight:700;color:var(--navy); }
+
+/* ═══════ EMPTY STATE ════════════════════════════════════════════════ */
+.empty-state { text-align:center;padding:80px 20px; }
+.empty-icon { font-size:56px;margin-bottom:16px;opacity:.6; }
+.empty-title { font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--navy);margin-bottom:8px; }
+.empty-desc  { font-size:13px;color:var(--text-muted);margin-bottom:24px;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.7; }
+
+/* ═══════ DATA CLEANER OVERLAY ═══════════════════════════════════════ */
+#cleanerOverlay {
+  display:none;position:fixed;inset:0;
+  background:rgba(8,12,30,.75);backdrop-filter:blur(4px);
+  z-index:2000;justify-content:center;align-items:flex-start;padding:24px 16px;overflow-y:auto;
+}
+#cleanerOverlay.show { display:flex; }
+#cleanerBox {
+  background:#fff;border-radius:14px;width:100%;max-width:1260px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+#cleanerHead {
+  background:linear-gradient(135deg,var(--navy),var(--navy-light));
+  padding:18px 24px;display:flex;align-items:center;justify-content:space-between;
+}
+#cleanerHead h2 { color:#fff;font-size:17px;margin:0;font-family:var(--font-head);font-weight:700; }
+#cleanerHead .sub { color:#A5B4FC;font-size:12px;margin-top:3px; }
+.cleaner-summary { display:flex;gap:10px;padding:14px 24px;background:#F8FAFC;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center; }
+.cs-badge { display:flex;align-items:center;gap:5px;background:#fff;border-radius:20px;padding:5px 12px;font-size:11.5px;font-weight:600;border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.cs-badge.red   { border-color:#FECACA;background:#FEF2F2;color:#991B1B; }
+.cs-badge.amber { border-color:#FDE68A;background:#FFFBEB;color:#92400E; }
+.cs-badge.green { border-color:#6EE7B7;background:#ECFDF5;color:#065F46; }
+.cs-badge.blue  { border-color:#BFDBFE;background:#EFF6FF;color:#1E40AF; }
+.cleaner-toolbar { padding:10px 24px;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--border);flex-wrap:wrap;background:#FAFAFA; }
+.cl-btn { padding:6px 14px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;font-family:var(--font-body); }
+.cl-btn-fix    { background:var(--blue);color:#fff; }
+.cl-btn-fix:hover    { background:#1D4ED8; }
+.cl-btn-skip   { background:#F1F5F9;color:#475569;border:1px solid var(--border); }
+.cl-btn-skip:hover { background:#E2E8F0; }
+.cl-btn-go     { background:#059669;color:#fff;font-size:13px;padding:8px 22px; }
+.cl-btn-go:hover     { background:#047857; }
+.cl-btn-cancel { background:#fff;color:var(--red);border:1px solid #FECACA; }
+.cl-btn-cancel:hover { background:var(--red-pale); }
+.filter-btns   { display:flex;gap:4px;margin-left:auto; }
+.filter-btn    { padding:5px 11px;border:1px solid var(--border);border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:var(--text-muted);transition:.12s; }
+.filter-btn.active { background:var(--navy);color:#fff;border-color:var(--navy); }
+#cleanerTableWrap { overflow-x:auto;max-height:50vh;overflow-y:auto; }
+table.cl-table { width:100%;border-collapse:collapse;font-size:11px;min-width:960px; }
+table.cl-table thead th { background:var(--navy);color:#fff;padding:8px 8px;text-align:left;white-space:nowrap;position:sticky;top:0;z-index:10;font-family:var(--font-head);font-weight:600; }
+table.cl-table tbody tr { border-bottom:1px solid #F1F5F9; }
+table.cl-table tbody tr:hover { background:#F8FAFC; }
+table.cl-table td { padding:6px 7px;vertical-align:middle; }
+table.cl-table td.row-num { text-align:center;color:var(--text-light);font-size:10px;width:28px; }
+.cl-tag { display:inline-block;padding:1px 7px;border-radius:6px;font-size:10px;font-weight:600;white-space:nowrap; }
+.cl-err  { background:#FFFBEB; }
+.cl-crit { background:#FEF2F2; }
+.cl-info { background:#ECFDF5; }
+.cl-issue-pill { display:inline-block;padding:2px 7px;border-radius:5px;font-size:9.5px;font-weight:600;margin:1px 2px;white-space:nowrap; }
+.pill-red   { background:#FECACA;color:#991B1B; }
+.pill-amber { background:#FDE68A;color:#92400E; }
+.pill-gray  { background:#F1F5F9;color:#475569;border:1px solid #E2E8F0; }
+input.cl-input { width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:5px;font-size:11px;background:#fff;font-family:var(--font-body); }
+input.cl-input.bad  { border-color:#F87171;background:#FEF2F2; }
+input.cl-input.ok   { border-color:#6EE7B7;background:#ECFDF5; }
+select.cl-select { width:100%;padding:4px 5px;border:1px solid #E2E8F0;border-radius:5px;font-size:11px;background:#fff; }
+select.cl-select.bad { border-color:#F87171;background:#FEF2F2; }
+.res-select { width:100%;padding:4px 5px;border:1px solid #C7D2FE;border-radius:5px;font-size:10.5px;background:#EEF2FF;font-weight:600;color:#3730A3; }
+.res-select.accepted  { background:#ECFDF5;border-color:#6EE7B7;color:#065F46; }
+.res-select.corrected { background:#EFF6FF;border-color:#BFDBFE;color:#1E40AF; }
+.res-select.cleared   { background:#FFFBEB;border-color:#FDE68A;color:#92400E; }
+.res-select.flagged   { background:#FFF0F6;border-color:#FBCFE8;color:#9D174D; }
+.remark-input { width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:5px;font-size:10px;background:#FAFAFA;font-style:italic;font-family:var(--font-body); }
+.remark-input:focus { border-color:#818CF8;background:#fff;outline:none; }
+.cl-footer { padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#FAFAFA;flex-wrap:wrap;gap:10px; }
+.cl-footer-info { font-size:12px;color:var(--text-muted); }
+#cleanerProgress { font-size:12.5px;color:#374151;padding:10px 24px;background:#ECFDF5;display:none;border-top:1px solid #6EE7B7; }
+
+/* ═══════ DATE MODAL ═════════════════════════════════════════════════ */
+.modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1500;justify-content:center;align-items:center; }
+.modal-overlay.show { display:flex; }
+.modal { background:#fff;border-radius:14px;padding:28px;width:780px;max-width:95vw;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg); }
+.modal h2 { font-size:17px;color:var(--navy);margin-bottom:6px;font-family:var(--font-head); }
+.modal p  { font-size:12.5px;color:var(--text-muted);margin-bottom:18px;line-height:1.6; }
+.modal-table { width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:18px; }
+.modal-table th { background:var(--navy);color:#fff;padding:8px 9px;text-align:left;font-family:var(--font-head); }
+.modal-table td { padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:middle; }
+.modal-table tr:hover td { background:var(--surface); }
+.modal-table input[type="date"] { padding:5px 7px;border:1px solid #E2E8F0;border-radius:5px;font-size:11px;width:136px; }
+.modal-table input.missing { border-color:#F87171;background:#FEF2F2; }
+.modal-table input.filled  { border-color:#6EE7B7;background:#ECFDF5; }
+.modal-actions { display:flex;gap:10px;justify-content:flex-end;margin-top:4px; }
+
+/* ═══════ PRINT ══════════════════════════════════════════════════════ */
+@media print{
+  .sidebar,.topbar,.controls,.status-bar,.modal-overlay,.kpi-grid,.tabs,.legend { display:none !important; }
+  .app,.main,.content { display:block;height:auto;overflow:visible; }
+  .report-panel { box-shadow:none;border:none; }
+  .tab-content { display:block !important;page-break-after:always; }
+  .table-wrap { max-height:none;overflow:visible; }
+  .h-top,.h-week,.wc.done,.wc.prog,.wc.plan,.ov-fill,.summary-row td { -webkit-print-color-adjust:exact;print-color-adjust:exact; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══════ SIDEBAR ═══════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">
+      <div class="sb-logo-icon">G</div>
+      <div class="sb-logo-text">GME BIZ<br><span style="font-weight:400;font-size:12px;color:rgba(255,255,255,.5)">Dev Status</span></div>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section-label">Reports</div>
+    <div class="sb-link active" id="nav-project" onclick="switchView('project',this)">
+      <span class="ic">📋</span> Project Status
+      <span class="badge" id="nav-proj-badge">—</span>
+    </div>
+    <div class="sb-link" id="nav-developer" onclick="switchView('developer',this)">
+      <span class="ic">👨‍💻</span> Developer Status
+      <span class="badge" id="nav-dev-badge">—</span>
+    </div>
+
+    <div class="sb-section-label" style="margin-top:16px;">Data</div>
+    <div class="sb-link" onclick="document.getElementById('csvInputSb').click()">
+      <span class="ic">📂</span> Load CSV
+      <input type="file" id="csvInputSb" accept=".csv" style="display:none" onchange="handleCSVUpload(event)"/>
+    </div>
+    <div class="sb-link" onclick="startFetch()">
+      <span class="ic">🔄</span> Fetch Jira
+    </div>
+
+    <div class="sb-section-label" style="margin-top:16px;">Export</div>
+    <div class="sb-link" id="sb-excel" style="opacity:.4;pointer-events:none;" onclick="downloadExcel()">
+      <span class="ic">📊</span> Download Excel
+    </div>
+    <div class="sb-link" onclick="window.print()">
+      <span class="ic">🖨️</span> Print Report
+    </div>
+
+    <div class="sb-section-label" style="margin-top:16px;">Issues</div>
+    <div class="sb-link" id="nav-errors" style="display:none;" onclick="showCleanerAgain()">
+      <span class="ic">⚠️</span> Data Issues
+      <span class="badge red" id="nav-errors-badge">0</span>
+    </div>
+  </nav>
+
+  <div class="sb-footer">
+    <div><span class="sb-status-dot"></span><span class="sb-status-text">Ready</span></div>
+    <div class="sb-date" id="sbDate">—</div>
+  </div>
+</aside>
+
+<!-- ═══════ MAIN ══════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-title-wrap">
+      <div class="topbar-title" id="pageTitle">GME BIZ Development Status — Project</div>
+      <div class="topbar-sub" id="reportMeta">Upload a CSV or fetch from Jira to get started</div>
+    </div>
+
+    <span id="syncBadge" class="sync-badge"><span style="width:7px;height:7px;background:#34D399;border-radius:50%;animation:pulse 2s infinite;display:inline-block;"></span> Live</span>
+
+    <label class="btn btn-purple btn-file" title="Upload Jira CSV export">
+      📂 Load CSV
+      <input type="file" accept=".csv" onchange="handleCSVUpload(event)"/>
+    </label>
+    <button class="btn btn-dark" onclick="startFetch()">🔄 Fetch Jira</button>
+    <button class="btn btn-ghost" onclick="window.print()">🖨️ Print</button>
+    <button class="btn btn-green" id="excelBtn" style="display:none;" onclick="downloadExcel()">📊 Excel</button>
+  </header>
+
+  <!-- CONTENT AREA -->
+  <div class="content" id="contentArea">
+
+    <!-- STATUS BAR -->
+    <div class="status-bar" id="statusBar"></div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid" id="kpiGrid" style="display:none;">
+      <div class="kpi-card blue">
+        <div class="kpi-icon blue">🗂️</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Projects</div>
+          <div class="kpi-value" id="kpi-projects">—</div>
+          <div class="kpi-sub" id="kpi-projects-sub">—</div>
+        </div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-icon green">✅</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tasks Complete</div>
+          <div class="kpi-value" id="kpi-done">—</div>
+          <div class="kpi-sub" id="kpi-done-sub">—</div>
+        </div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-icon orange">⚙️</div>
+        <div class="kpi-body">
+          <div class="kpi-label">In Progress</div>
+          <div class="kpi-value" id="kpi-inprog">—</div>
+          <div class="kpi-sub" id="kpi-inprog-sub">—</div>
+        </div>
+      </div>
+      <div class="kpi-card blue" id="kpiOverall">
+        <div class="kpi-ring" id="kpiRing">
+          <svg width="44" height="44" viewBox="0 0 44 44">
+            <circle cx="22" cy="22" r="18" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+            <circle id="ringArc" cx="22" cy="22" r="18" fill="none" stroke="#2563EB" stroke-width="4" stroke-dasharray="0 113" stroke-linecap="round"/>
+          </svg>
+          <div class="kpi-ring-text" id="ringPct">0%</div>
+        </div>
+        <div class="kpi-body">
+          <div class="kpi-label">Overall Progress</div>
+          <div class="kpi-value" id="kpi-pct">—%</div>
+          <div class="kpi-sub" id="kpi-pct-sub">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORT PANEL -->
+    <div class="report-panel">
+
+      <!-- TABS -->
+      <div class="tabs" id="tabBar">
+        <button class="tab-btn active" id="btn-project"   onclick="switchTab('project',this)">📋 Project Status</button>
+        <button class="tab-btn"        id="btn-developer" onclick="switchTab('developer',this)">👨‍💻 Developer Status</button>
+      </div>
+
+      <!-- LEGEND + ACTIONS -->
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot leg-done"></div> Done</div>
+        <div class="leg-item"><div class="leg-dot leg-prog"></div> In Progress</div>
+        <div class="leg-item"><div class="leg-dot leg-plan"></div> Planned</div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+          <span style="font-size:11px;color:var(--text-muted);">Current week: <strong id="curWeekLabel">—</strong></span>
+        </div>
+      </div>
+
+      <!-- TAB CONTENT -->
+      <div class="table-wrap">
+        <div id="tab-project" class="tab-content active">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📂</div>
+            <div class="empty-title">No data loaded yet</div>
+            <div class="empty-desc">Upload your Jira CSV export or click "Fetch Jira" to load data. The data cleaner will open so you can review and fix issues before the report generates.</div>
+            <label class="btn btn-purple btn-file" style="font-size:14px;padding:12px 28px;">
+              📂 Choose CSV File
+              <input type="file" accept=".csv" onchange="handleCSVUpload(event)"/>
+            </label>
+            <div style="margin-top:12px;font-size:11px;color:var(--text-light);">Supports "Issue key" and "Key" column formats · UTF-8 and Latin-1 encoding</div>
+          </div>
+        </div>
+        <div id="tab-developer" class="tab-content">
+          <div class="empty-state">Load a CSV to see developer data.</div>
+        </div>
+      </div>
+
+    </div><!-- /report-panel -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ═══════ DATA CLEANER OVERLAY ═══════════════════════════════════ -->
+<div id="cleanerOverlay">
+  <div id="cleanerBox">
+    <div id="cleanerHead">
+      <div>
+        <h2>🧹 Data Cleaner — Review Before Generating Report</h2>
+        <div class="sub" id="cleanerSubtitle">Reviewing data quality issues…</div>
+      </div>
+      <button class="cl-btn cl-btn-cancel" onclick="closeCleanerOverlay()">✕ Cancel</button>
+    </div>
+    <div class="cleaner-summary" id="cleanerSummary"></div>
+    <div class="cleaner-toolbar">
+      <button class="cl-btn cl-btn-fix" onclick="autoFixAll()">⚡ Auto-Fix All</button>
+      <button class="cl-btn cl-btn-skip" onclick="clearFilters()">📋 All Rows</button>
+      <div class="filter-btns">
+        <button class="filter-btn" id="flt-errors" onclick="filterRows('errors')">❌ Errors</button>
+        <button class="filter-btn" id="flt-warn"   onclick="filterRows('warn')">⚠️ Warnings</button>
+        <button class="filter-btn active" id="flt-all" onclick="filterRows('all')">All</button>
+      </div>
+    </div>
+    <div id="cleanerTableWrap">
+      <table class="cl-table" id="cleanerTable">
+        <thead><tr>
+          <th style="width:28px;">#</th>
+          <th style="width:68px;">Key</th>
+          <th style="width:65px;">Type</th>
+          <th style="min-width:180px;">Summary</th>
+          <th style="width:92px;">Status</th>
+          <th style="width:80px;">Assignee</th>
+          <th style="width:102px;">Start Date</th>
+          <th style="width:102px;">Due Date</th>
+          <th style="width:102px;">Completed</th>
+          <th style="width:120px;">Issues Found</th>
+          <th style="width:135px;">Resolution</th>
+          <th style="width:160px;">Remark</th>
+        </tr></thead>
+        <tbody id="cleanerBody"></tbody>
+      </table>
+    </div>
+    <div id="cleanerProgress"></div>
+    <div class="cl-footer">
+      <div class="cl-footer-info" id="cleanerFooterInfo">—</div>
+      <div style="display:flex;gap:10px;">
+        <button class="cl-btn cl-btn-skip" onclick="closeCleanerOverlay()">Cancel</button>
+        <button class="cl-btn cl-btn-go" onclick="confirmCleanedData()">✅ Generate Report →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DATE MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>📅 Assign Missing Dates</h2>
+    <p>The tickets below are missing <strong>Start Date</strong> or <strong>Due Date</strong>. Please assign them before generating the Gantt chart.</p>
+    <table class="modal-table">
+      <thead><tr>
+        <th style="width:95px;">Ticket</th><th>Task Name</th>
+        <th style="width:80px;">Status</th>
+        <th style="width:140px;">Start Date</th>
+        <th style="width:140px;">Due Date</th>
+      </tr></thead>
+      <tbody id="missingDateRows"></tbody>
+    </table>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmDates()">✅ Generate Report</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ════════ STATE ════════════════════════════════════════════════════ */
+const STATE = {
+  issues:[],
+  set(raw){
+    this.issues = raw.map(i=>({...i}));
+    renderBoth();
+    updateKPIs();
+  },
+  get epicMap(){ return groupByEpic(this.issues); },
+  get devMap() { return groupByDev(this.issues);  },
+};
+
+/* ════════ SIDEBAR DATE ═════════════════════════════════════════════ */
+(function(){
+  const t=new Date();
+  const opts={weekday:'short',year:'numeric',month:'short',day:'numeric'};
+  document.getElementById('sbDate').textContent = t.toLocaleDateString('en-US',opts);
+})();
+
+/* ════════ 12-WEEK TIMELINE ════════════════════════════════════════ */
+function generateWeeks(){
+  const today=new Date(), dow=today.getDay(), toMon=dow===0?-6:1-dow;
+  const mon=new Date(today); mon.setDate(today.getDate()+toMon-21); mon.setHours(0,0,0,0);
+  return Array.from({length:12},(_,i)=>{
+    const s=new Date(mon); s.setDate(mon.getDate()+i*7);
+    const e=new Date(s);   e.setDate(s.getDate()+6);
+    return { label:Math.ceil(s.getDate()/7)+'W', date:`${s.getMonth()+1}/${s.getDate()}`, start:s, end:e, isCurrent:s<=today&&today<=e };
+  });
+}
+const WEEKS=generateWeeks();
+// Show current week in legend
+(()=>{ const cw=WEEKS.find(w=>w.isCurrent); document.getElementById('curWeekLabel').textContent=cw?`${cw.date} (${cw.label})`:'—'; })();
+
+function monthSpans(){
+  const out=[]; let cm=-1,cs=0,cl='';
+  WEEKS.forEach(w=>{ const m=w.start.getMonth(),l=w.start.toLocaleString('default',{month:'short'});
+    if(m!==cm){if(cs)out.push({label:cl,span:cs});cm=m;cs=1;cl=l;}else cs++; });
+  if(cs)out.push({label:cl,span:cs}); return out;
+}
+
+/* ════════ GROUPING ════════════════════════════════════════════════ */
+function groupByEpic(issues){
+  const m={};
+  issues.forEach(i=>{ const k=i.epicName||i.parent||'General';
+    if(!m[k])m[k]={name:k,description:i.epicSummary||'',tasks:[],assignees:new Set()};
+    if(i.type!=='Epic'){ m[k].tasks.push(i); if(i.assignee)m[k].assignees.add(i.assignee); } });
+  return m;
+}
+function groupByDev(issues){
+  const m={};
+  issues.filter(i=>i.type!=='Epic').forEach(i=>{ const d=i.assignee||'Unassigned';
+    if(!m[d])m[d]=[]; m[d].push(i); });
+  return m;
+}
+
+/* ════════ STATUS HELPERS ══════════════════════════════════════════ */
+function isDoneStatus(s){ return ['done','closed','resolved','complete','completed'].includes(s); }
+function isProgStatus(s){ return ['progress','review','testing','staging'].some(x=>s.includes(x)); }
+
+/* ════════ GANTT + PROGRESS ════════════════════════════════════════ */
+function ganttCells(issue){
+  const start=issue.startDate?new Date(issue.startDate):null;
+  const due  =issue.dueDate  ?new Date(issue.dueDate)  :null;
+  const sl   =(issue.status||'').toLowerCase();
+  const color=isDoneStatus(sl)?'done':isProgStatus(sl)?'prog':'plan';
+  return WEEKS.map(w=>{
+    const cur=w.isCurrent?' cur':'';
+    if(!start||!due)return `<td class="wc empty${cur}"></td>`;
+    if(!(w.start<=due&&w.end>=start))return `<td class="wc empty${cur}"></td>`;
+    const label=(due>=w.start&&due<=w.end)?`${due.getMonth()+1}/${due.getDate()}`:'';
+    return `<td class="wc ${color}${cur}">${label}</td>`;
+  }).join('');
+}
+function calcPct(issues){
+  if(!issues.length)return 0;
+  if(issues.length===1&&issues[0].progress!==undefined&&issues[0].progress>0) return Math.round(issues[0].progress);
+  const score=issues.reduce((sum,i)=>{
+    if(i.progress!==undefined&&i.progress>0)return sum+i.progress/100;
+    const s=(i.status||'').toLowerCase();
+    if(isDoneStatus(s))return sum+1; if(isProgStatus(s))return sum+0.5; return sum;
+  },0);
+  return Math.round((score/issues.length)*100);
+}
+function ovBar(pct){
+  const c=pct>=80?'#059669':pct>=40?'#D97706':'#DC2626';
+  return `<div class="ov-bg"><div class="ov-fill" style="background:${c};width:${pct}%"></div></div>
+          <div style="text-align:center;font-size:10px;font-weight:700;font-family:var(--font-head);color:var(--text);">${pct}%</div>`;
+}
+function wkHeaders(){
+  const mRow=monthSpans().map(m=>`<th colspan="${m.span}">${m.label}</th>`).join('');
+  const wRow=WEEKS.map(w=>`<th${w.isCurrent?' class="cur"':''}>${w.label}</th>`).join('');
+  const dRow=WEEKS.map(w=>`<th${w.isCurrent?' class="cur"':''}>${w.date}</th>`).join('');
+  return {mRow,wRow,dRow};
+}
+
+/* ════════ KPI CARDS ═══════════════════════════════════════════════ */
+function updateKPIs(){
+  const issues=STATE.issues.filter(i=>i.type!=='Epic');
+  if(!issues.length)return;
+  const done  =issues.filter(i=>isDoneStatus((i.status||'').toLowerCase())).length;
+  const inprog=issues.filter(i=>isProgStatus((i.status||'').toLowerCase())).length;
+  const total =issues.length;
+  const pct   =calcPct(issues);
+  const projs =Object.keys(STATE.epicMap).length;
+
+  document.getElementById('kpiGrid').style.display='grid';
+  document.getElementById('kpi-projects').textContent=projs;
+  document.getElementById('kpi-projects-sub').textContent=`${total} total tasks`;
+  document.getElementById('kpi-done').textContent=done;
+  document.getElementById('kpi-done-sub').textContent=`${Math.round(done/total*100)}% of all tasks`;
+  document.getElementById('kpi-inprog').textContent=inprog;
+  document.getElementById('kpi-inprog-sub').textContent=`${total-done-inprog} planned/backlog`;
+  document.getElementById('kpi-pct').textContent=pct+'%';
+  document.getElementById('kpi-pct-sub').textContent=`${done} done · ${inprog} active`;
+  document.getElementById('ringPct').textContent=pct+'%';
+  const circ=2*Math.PI*18; const arc=circ*(pct/100);
+  document.getElementById('ringArc').setAttribute('stroke-dasharray',`${arc} ${circ-arc}`);
+  const ringColor=pct>=80?'#059669':pct>=40?'#D97706':'#DC2626';
+  document.getElementById('ringArc').setAttribute('stroke',ringColor);
+
+  // Sidebar badge counts
+  const em=STATE.epicMap,dm=STATE.devMap;
+  document.getElementById('nav-proj-badge').textContent=Object.keys(em).length;
+  document.getElementById('nav-dev-badge').textContent=Object.keys(dm).length;
+}
+
+/* ════════ RENDER BOTH TABS ════════════════════════════════════════ */
+function renderBoth(){
+  renderProjectTab(STATE.epicMap);
+  renderDeveloperTab(STATE.devMap);
+  const em=STATE.epicMap,dm=STATE.devMap;
+  document.getElementById('btn-project').textContent  =`📋 Project Status (${Object.keys(em).length})`;
+  document.getElementById('btn-developer').textContent=`👨‍💻 Developer Status (${Object.keys(dm).length})`;
+  document.getElementById('syncBadge').style.display='inline-flex';
+  document.getElementById('excelBtn').style.display='inline-block';
+  document.getElementById('sb-excel').style.cssText='';
+  const t=new Date();
+  document.getElementById('reportMeta').textContent=
+    `Generated ${t.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})} · By BIZ Team`;
+}
+
+/* ════════ PROJECT TAB ══════════════════════════════════════════════ */
+function renderProjectTab(epicMap){
+  const {mRow,wRow,dRow}=wkHeaders();
+  const nonEpic=STATE.issues.filter(i=>i.type!=='Epic');
+  let rows='',no=1;
+  Object.values(epicMap).forEach(epic=>{
+    if(!epic.tasks.length)return;
+    const pct=calcPct(epic.tasks), wt=Math.round(100/epic.tasks.length);
+    const due=epic.tasks.reduce((l,t)=>(!t.dueDate?l:(!l||t.dueDate>l?t.dueDate:l)),null);
+    const rs=epic.tasks.length;
+    epic.tasks.forEach((task,idx)=>{
+      const tp=calcPct([task]);
+      if(idx===0){
+        rows+=`<tr>
+          <td class="no" rowspan="${rs}">${no++}</td>
+          <td class="proj" rowspan="${rs}">${epic.name}</td>
+          <td class="desc" rowspan="${rs}">${epic.description||'—'}</td>
+          <td class="task">${task.summary}<span class="ticket">${task.id}</span></td>
+          ${ganttCells(task)}
+          <td class="pct">${wt}%</td>
+          <td class="pct">${tp}%</td>
+          <td class="ov-wrap" rowspan="${rs}">${ovBar(pct)}</td>
+          <td class="date" rowspan="${rs}">${due||'—'}</td>
+          <td class="pct" rowspan="${rs}" style="font-size:9.5px;">Manoj</td>
+          <td rowspan="${rs}" style="font-size:9.5px;line-height:1.8;">${[...epic.assignees].join('<br>')}</td>
+        </tr>`;
+      } else {
+        rows+=`<tr>
+          <td class="task">${task.summary}<span class="ticket">${task.id}</span></td>
+          ${ganttCells(task)}
+          <td class="pct">${wt}%</td>
+          <td class="pct">${tp}%</td>
+        </tr>`;
+      }
+    });
+  });
+  const tp=calcPct(nonEpic);
+  rows+=`<tr class="summary-row">
+    <td colspan="4" class="pct" style="font-size:11px;padding:8px;">📊 Overall — ${Object.keys(epicMap).length} Projects · ${nonEpic.length} Tasks</td>
+    <td colspan="12" style="padding:6px;">
+      <div style="background:#E2E8F0;border-radius:4px;height:12px;"><div style="background:#059669;width:${tp}%;height:12px;border-radius:4px;transition:.4s;"></div></div>
+      <div style="text-align:center;font-size:11px;font-weight:700;margin-top:3px;font-family:var(--font-head);">${tp}% Complete</div>
+    </td>
+    <td></td><td></td><td class="pct" style="font-size:10px;">📊</td><td colspan="2"></td>
+  </tr>`;
+  document.getElementById('tab-project').innerHTML=`
+    <table class="report">
+      <thead>
+        <tr class="h-top">
+          <th rowspan="3" style="width:28px;">No.</th>
+          <th rowspan="3" style="width:110px;">Project</th>
+          <th rowspan="3" style="width:165px;text-align:left;">Description</th>
+          <th rowspan="3" style="width:200px;text-align:left;">Task / Sub-task</th>
+          ${mRow}
+          <th rowspan="3" style="width:54px;">Weight</th>
+          <th rowspan="3" style="width:58px;">Progress</th>
+          <th rowspan="3" style="width:76px;">Overall</th>
+          <th rowspan="3" style="width:80px;">Target Date</th>
+          <th rowspan="3" style="width:52px;">PIC</th>
+          <th rowspan="3" style="width:120px;">Developer</th>
+        </tr>
+        <tr class="h-week">${wRow}</tr>
+        <tr class="h-week">${dRow}</tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+/* ════════ DEVELOPER TAB ════════════════════════════════════════════ */
+function renderDeveloperTab(devMap){
+  const {mRow,wRow,dRow}=wkHeaders();
+  const nonEpic=STATE.issues.filter(i=>i.type!=='Epic');
+  let rows='',no=1;
+  Object.entries(devMap).forEach(([dev,tasks])=>{
+    const rs=tasks.length;
+    tasks.forEach((task,idx)=>{
+      const pct=calcPct([task]),note=(task.labels||[]).join(', ');
+      if(idx===0){
+        rows+=`<tr>
+          <td class="no" rowspan="${rs}">${no++}</td>
+          <td class="proj" rowspan="${rs}">${dev.replace(' ','<br>')}</td>
+          <td class="task">${task.summary}<span class="ticket">${task.id}</span></td>
+          ${ganttCells(task)}
+          <td class="pct">${pct}%</td>
+          <td class="date">${task.dueDate||'—'}</td>
+          <td class="note">${note}</td>
+        </tr>`;
+      } else {
+        rows+=`<tr>
+          <td class="task">${task.summary}<span class="ticket">${task.id}</span></td>
+          ${ganttCells(task)}
+          <td class="pct">${pct}%</td>
+          <td class="date">${task.dueDate||'—'}</td>
+          <td class="note">${note}</td>
+        </tr>`;
+      }
+    });
+  });
+  const tp=calcPct(nonEpic);
+  rows+=`<tr class="summary-row">
+    <td colspan="3" class="pct" style="font-size:11px;padding:8px;">📊 ${Object.keys(devMap).length} Developers · ${nonEpic.length} Tasks</td>
+    <td colspan="12" style="padding:6px;">
+      <div style="background:#E2E8F0;border-radius:4px;height:12px;"><div style="background:#059669;width:${tp}%;height:12px;border-radius:4px;"></div></div>
+      <div style="text-align:center;font-size:11px;font-weight:700;margin-top:3px;">${tp}% Overall</div>
+    </td>
+    <td class="pct">${tp}%</td><td class="date">—</td><td class="note">Summary</td>
+  </tr>`;
+  document.getElementById('tab-developer').innerHTML=`
+    <table class="report">
+      <thead>
+        <tr class="h-top">
+          <th rowspan="3" style="width:32px;">No.</th>
+          <th rowspan="3" style="width:110px;">Developer</th>
+          <th rowspan="3" style="width:280px;text-align:left;">Task</th>
+          ${mRow}
+          <th rowspan="3" style="width:62px;">Progress</th>
+          <th rowspan="3" style="width:86px;">Target Date</th>
+          <th rowspan="3" style="width:80px;">Note</th>
+        </tr>
+        <tr class="h-week">${wRow}</tr>
+        <tr class="h-week">${dRow}</tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+/* ════════ VIEW / TAB SWITCHING ════════════════════════════════════ */
+function switchView(view, el){
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  el.classList.add('active');
+  switchTab(view, document.getElementById('btn-'+view));
+}
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('tab-'+tab);
+  if(el)el.classList.add('active');
+  if(btn)btn.classList.add('active');
+  document.getElementById('pageTitle').textContent=
+    tab==='project'?'GME BIZ Development Status — Project':'GME BIZ Development Status — Developer';
+}
+
+/* ════════ STATUS BAR ═══════════════════════════════════════════════ */
+function setStatus(msg,type){
+  const el=document.getElementById('statusBar');
+  el.className=`status-bar ${type}`;
+  if(type==='loading') el.innerHTML=`<div class="spinner"></div>${msg}`;
+  else el.textContent=msg;
+}
+
+/* ════════ CSV PARSING ══════════════════════════════════════════════ */
+function parseMonthDate(str){
+  if(!str||!str.trim())return null; str=str.trim();
+  const iso=str.match(/^(\d{4}-\d{2}-\d{2})/); if(iso)return iso[1];
+  const m=str.match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/); if(!m)return null;
+  const months={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+  const mo=months[m[1].charAt(0).toUpperCase()+m[1].slice(1,3).toLowerCase()]; if(!mo)return null;
+  return `${m[3]}-${mo}-${m[2].padStart(2,'0')}`;
+}
+function parseCSVLine(line){
+  const result=[];let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(ch===','&&!inQ){result.push(cur);cur='';}
+    else cur+=ch;
+  }
+  result.push(cur); return result;
+}
+function parseCSVData(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  const headers=parseCSVLine(lines[0]).map(h=>h.trim());
+  const rows=lines.slice(1).map(line=>{
+    const vals=parseCSVLine(line),obj={};
+    headers.forEach((h,i)=>obj[h]=(vals[i]||'').trim()); return obj;
+  }).filter(r=>(r['Key']||r['Issue key']||'').trim().length>0);
+  if(!rows.length)throw new Error('No data rows found.');
+  const normalise=r=>({
+    key:r['Key']||r['Issue key']||'', summary:(r['Summary']||'').replace(/[\u2013\u2014]/g,'—').replace(/\u00a0/g,' ').trim(),
+    assignee:r['Assignee']||'', status:r['Status Category']||r['Status']||'', statusRaw:r['Status']||'',
+    startDate:parseMonthDate(r['Start date']), dueDate:parseMonthDate(r['Due date']),
+    completedDate:parseMonthDate(r['Completed Date'])||null, created:parseMonthDate(r['Created'])||null,
+    progress:parseFloat(r['Progress(%)'])||0, issueType:(r['Issue Type']||'Task').trim(),
+    parent:(r['Parent']||'').trim(), projectCat:(r['Project Category']||'').trim(),
+    reporter:r['Reporter']||'', labels:[r['Status']||''],
+  });
+  const normRows=rows.map(normalise);
+  const epicRows=normRows.filter(r=>r.issueType==='Epic');
+  const taskRows=normRows.filter(r=>r.issueType!=='Epic');
+  const hasEpics=epicRows.length>0, hasParent=taskRows.some(r=>r.parent.length>0);
+  const hasCat=taskRows.some(r=>r.projectCat.length>0);
+  const epicBySummaryKey={};
+  epicRows.forEach(e=>{epicBySummaryKey[e.key]=e;});
+  const issues=[];
+  if(hasEpics&&hasParent){
+    epicRows.forEach(e=>issues.push({id:e.key,summary:e.summary,assignee:e.assignee,status:e.status,startDate:e.startDate,dueDate:e.dueDate,completedDate:e.completedDate,progress:e.progress,type:'Epic',epicName:e.summary,epicSummary:'',labels:e.labels,_created:e.created}));
+    const epicsWithChildren=new Set();
+    taskRows.forEach(t=>{const pk=t.parent.split(' ')[0].trim();if(epicBySummaryKey[pk])epicsWithChildren.add(pk);});
+    epicRows.filter(e=>!epicsWithChildren.has(e.key)).forEach(e=>issues.push({id:e.key,summary:e.summary,assignee:e.assignee,status:e.status,startDate:e.startDate,dueDate:e.dueDate,completedDate:e.completedDate,progress:e.progress,type:'Task',epicName:e.summary,epicSummary:'',labels:e.labels,_created:e.created}));
+    taskRows.forEach(t=>{const pk=t.parent.split(' ')[0].trim(),parentEpic=epicBySummaryKey[pk];
+      issues.push({id:t.key,summary:t.summary,assignee:t.assignee,status:t.status,startDate:t.startDate,dueDate:t.dueDate,completedDate:t.completedDate,progress:t.progress,type:'Task',epicName:parentEpic?parentEpic.summary:(t.parent||'General'),epicSummary:'',labels:t.labels,_created:t.created});});
+  } else if(hasCat){
+    const cats=[...new Set(taskRows.map(r=>r.projectCat||'General'))];
+    cats.forEach(cat=>issues.push({id:'CAT-'+cat.replace(/\s+/g,'-').slice(0,20),summary:cat,assignee:'',status:'In Progress',startDate:null,dueDate:null,completedDate:null,progress:0,type:'Epic',epicName:cat,epicSummary:'',labels:[],_created:null}));
+    taskRows.forEach(t=>issues.push({id:t.key,summary:t.summary,assignee:t.assignee,status:t.status,startDate:t.startDate,dueDate:t.dueDate,completedDate:t.completedDate,progress:t.progress,type:'Task',epicName:t.projectCat||'General',epicSummary:'',labels:t.labels,_created:t.created}));
+  } else {
+    taskRows.forEach(t=>issues.push({id:t.key,summary:t.summary,assignee:t.assignee,status:t.status,startDate:t.startDate,dueDate:t.dueDate,completedDate:t.completedDate,progress:t.progress,type:'Task',epicName:'General',epicSummary:'',labels:t.labels,_created:t.created}));
+  }
+  return {issues,raw:normRows};
+}
+
+/* ════════ DATA CLEANER ═════════════════════════════════════════════ */
+let CLEANER_ROWS=[], _currentFilter='all', _lastRaw=null;
+
+function detectIssues(row){
+  const issues=[],s=(row.status||'').toLowerCase(),cd=row.completedDate,sd=row.startDate,dd=row.dueDate,cr=row._created;
+  if(!sd&&row.type!=='Epic') issues.push({type:'error',field:'startDate',msg:'Missing Start Date',fix:'leave'});
+  if(!dd) issues.push({type:'error',field:'dueDate',msg:'Missing Due Date',fix:'leave'});
+  if(isDoneStatus(s)&&!cd) issues.push({type:'error',field:'completedDate',msg:'Done → no Completed Date',fix:'useToday'});
+  if(!isDoneStatus(s)&&cd&&row._resolution!=='accepted') issues.push({type:'error',field:'completedDate',msg:`${row.status} status but has Completed Date`,fix:'clearCompleted'});
+  if(cd&&row._resolution!=='accepted'){
+    if(cd&&sd&&cd<sd) issues.push({type:'error',field:'completedDate',msg:`❌ Completed (${cd}) before Start (${sd})`,fix:'needsResolution',conflictType:'beforeStart'});
+    else if(cd&&cr&&cd<cr){
+      if(sd&&cd>=sd) issues.push({type:'info',field:'completedDate',msg:`ℹ️ Ticket created late (Done ${cd}, Started ${sd}, Ticket ${cr})`,fix:'autoAccept',conflictType:'lateTicket'});
+      else if(!sd) issues.push({type:'warn',field:'completedDate',msg:`⏮ Done (${cd}) before ticket created (${cr}) — no Start Date`,fix:'needsResolution',conflictType:'backdated'});
+      else issues.push({type:'warn',field:'completedDate',msg:`⏮ Done before ticket & start (${cd} < ${cr})`,fix:'needsResolution',conflictType:'backdated'});
+    }
+  }
+  if(dd&&cr&&dd<cr) issues.push({type:'warn',field:'dueDate',msg:`Due (${dd}) before Created (${cr})`,fix:'leave'});
+  if(cd&&dd&&cd>dd) issues.push({type:'warn',field:'completedDate',msg:`Late delivery: ${Math.round((new Date(cd)-new Date(dd))/864e5)}d after due`,fix:'leave'});
+  if(row.summary&&/[\u00a0\u2013\u2014]/.test(row.summary)) issues.push({type:'warn',field:'summary',msg:'Special chars in summary',fix:'fixChars'});
+  if(row.type!=='Epic'&&!row.epicName) issues.push({type:'warn',field:'epicName',msg:'No parent Epic → General group',fix:'leave'});
+  return issues;
+}
+
+function openCleanerOverlay(parsedIssues,rawRows){
+  CLEANER_ROWS=parsedIssues.filter(r=>r.type!=='Epic').map((r,idx)=>({...r,_idx:idx,_resolution:null,_remark:'',_issues:[]}));
+  CLEANER_ROWS.forEach(r=>{r._issues=detectIssues(r);});
+  renderCleanerSummary(); renderCleanerTable(CLEANER_ROWS);
+  document.getElementById('cleanerProgress').style.display='none';
+  document.getElementById('cleanerOverlay').classList.add('show');
+}
+function closeCleanerOverlay(){ document.getElementById('cleanerOverlay').classList.remove('show'); }
+function showCleanerAgain(){ if(CLEANER_ROWS.length)document.getElementById('cleanerOverlay').classList.add('show'); }
+
+function renderCleanerSummary(){
+  const errors  =CLEANER_ROWS.filter(r=>r._issues.some(i=>i.type==='error'));
+  const warnings=CLEANER_ROWS.filter(r=>r._issues.some(i=>i.type==='warn')&&!r._issues.some(i=>i.type==='error'));
+  const infos   =CLEANER_ROWS.filter(r=>r._issues.some(i=>i.type==='info')&&!r._issues.some(i=>i.type==='error')&&!r._issues.some(i=>i.type==='warn'));
+  const clean   =CLEANER_ROWS.filter(r=>!r._issues.length||r._issues.every(i=>i.type==='info'&&r._resolution==='accepted'));
+  const total   =CLEANER_ROWS.length;
+  document.getElementById('cleanerSummary').innerHTML=`
+    <div class="cs-badge blue">📋 ${total} rows</div>
+    <div class="cs-badge red">❌ ${errors.length} error${errors.length!==1?'s':''}</div>
+    <div class="cs-badge amber">⚠️ ${warnings.length} warning${warnings.length!==1?'s':''}</div>
+    ${infos.length?`<div class="cs-badge green">ℹ️ ${infos.length} info</div>`:''}
+    <div class="cs-badge green">✅ ${clean.length} clean</div>
+    <div class="cs-badge" style="font-size:10.5px;color:#3730A3;background:#EEF2FF;border-color:#C7D2FE;">
+      Completed ≥ Start → ✅ Valid &nbsp;|&nbsp; Completed &lt; Start → ❌ Error &nbsp;|&nbsp; No Start → ⚠️ Review
+    </div>`;
+  document.getElementById('cleanerFooterInfo').textContent=errors.length?`⚠️ ${errors.length} error(s) need attention`:warnings.length?`${warnings.length} warning(s) — can generate anyway`:`All data looks clean — ready!`;
+  document.getElementById('cleanerSubtitle').textContent=`${total} tasks · ${errors.length} errors · ${warnings.length} warnings · ${infos.length} auto-ok`;
+}
+
+function filterRows(f){
+  _currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`flt-${f}`)?.classList.add('active');
+  const filtered=f==='errors'?CLEANER_ROWS.filter(r=>r._issues.some(i=>i.type==='error')):f==='warn'?CLEANER_ROWS.filter(r=>r._issues.length>0):CLEANER_ROWS;
+  renderCleanerTable(filtered);
+}
+function clearFilters(){ filterRows('all'); }
+
+function renderCleanerTable(rows){
+  const tbody=document.getElementById('cleanerBody');
+  if(!rows.length){ tbody.innerHTML=`<tr><td colspan="12" style="text-align:center;padding:28px;color:#999;">No rows match this filter.</td></tr>`; return; }
+  const RES_OPTS=[
+    {val:'',label:'— Select —',cls:''},
+    {val:'accepted',label:'✅ Accept (Backdated)',cls:'accepted',title:'Work done before ticket created — keep dates'},
+    {val:'corrected',label:'📅 Use Created Date',cls:'corrected',title:'Set Completed = Created date'},
+    {val:'cleared',label:'🗑 Clear Date',cls:'cleared',title:'Remove Completed Date'},
+    {val:'flagged',label:'🚩 Needs Review',cls:'flagged',title:'Flag for manual follow-up'},
+  ];
+  tbody.innerHTML=rows.map((r,displayIdx)=>{
+    const isBackdated=r._issues.some(i=>i.conflictType==='backdated');
+    const isBeforeStart=r._issues.some(i=>i.conflictType==='beforeStart');
+    const isLateTicket=r._issues.some(i=>i.conflictType==='lateTicket');
+    const hasErr=r._issues.some(i=>i.type==='error'),hasWarn=r._issues.some(i=>i.type==='warn'),hasInfo=r._issues.some(i=>i.type==='info');
+    const rowCls=hasErr?'cl-crit':hasWarn?'cl-err':hasInfo&&r._resolution!=='accepted'?'cl-info':'';
+    const pills=r._issues.map(i=>`<span class="cl-issue-pill ${i.type==='error'?'pill-red':i.type==='warn'?'pill-amber':'pill-gray'}">${i.msg}</span>`).join('')||`<span class="cl-issue-pill pill-gray">✅ Clean</span>`;
+    const sdBad=!r.startDate&&r.type!=='Epic',ddBad=!r.dueDate;
+    const cdBad=isDoneStatus((r.status||'').toLowerCase())&&!r.completedDate;
+    const cdWarn=!isDoneStatus((r.status||'').toLowerCase())&&r.completedDate;
+    const showResolution=isBackdated||isBeforeStart||isLateTicket||cdWarn;
+    const resCls=r._resolution?RES_OPTS.find(o=>o.val===r._resolution)?.cls||'':'';
+    const resDropdown=showResolution?`
+      <select class="res-select ${resCls}" onchange="updateResolution(${r._idx},this.value)">
+        ${RES_OPTS.map(o=>`<option value="${o.val}" ${r._resolution===o.val?'selected':''} ${o.title?`title="${o.title}"`:''}>${o.label}</option>`).join('')}
+      </select>
+      ${isLateTicket&&r._resolution==='accepted'?`<div style="font-size:9px;color:#065F46;margin-top:2px;">✅ Auto-accepted</div>`:''}
+      ${isBeforeStart?`<div style="font-size:9px;color:#991B1B;margin-top:2px;">Cannot finish before starting</div>`:''}
+    `:`<span style="font-size:10px;color:#CBD5E1;">—</span>`;
+    const remarkPlaceholder=isBeforeStart?'e.g. Wrong date entered':isLateTicket?'e.g. Ticket created after work done':isBackdated?'e.g. Work done before Jira ticket':cdWarn?'e.g. Duplicate entry':'Optional note…';
+    const cdClass=isBeforeStart?'bad':isLateTicket&&r._resolution==='accepted'?'ok':cdBad?'bad':cdWarn&&!r._resolution?'bad':r.completedDate?'ok':'';
+    const cdBorderOverride=(isBackdated||isLateTicket)&&!r._resolution?'border-color:#F59E0B;background:#FFFBEB;':'';
+    const dateHints=[];
+    if(r._created)dateHints.push(`Created: ${r._created}`);
+    if(r.startDate&&(isBeforeStart||isLateTicket||isBackdated))dateHints.push(`Start: ${r.startDate}`);
+    return `<tr class="${rowCls}" data-rowidx="${r._idx}">
+      <td class="row-num">${displayIdx+1}</td>
+      <td style="font-weight:700;font-size:10px;color:var(--navy);white-space:nowrap;font-family:var(--font-mono);">${r.id}</td>
+      <td><span class="cl-tag" style="background:#EEF2FF;color:#3730A3;">${r.type||'Task'}</span></td>
+      <td><input class="cl-input${r._issues.some(i=>i.field==='summary')?' bad':''}" value="${(r.summary||'').replace(/"/g,'&quot;')}" onchange="updateCleanerField(${r._idx},'summary',this.value)" style="font-size:10.5px;"/></td>
+      <td>
+        <select class="cl-select${cdBad||cdWarn?' bad':''}" onchange="updateCleanerField(${r._idx},'status',this.value)">
+          ${['Done','In Progress','Testing','To Do'].map(v=>`<option${v===r.status?' selected':''}>${v}</option>`).join('')}
+        </select>
+      </td>
+      <td style="font-size:10px;white-space:nowrap;">${r.assignee||'—'}</td>
+      <td><input type="date" class="cl-input${sdBad?' bad':r.startDate?' ok':''}" value="${r.startDate||''}" onchange="updateCleanerField(${r._idx},'startDate',this.value)"/></td>
+      <td><input type="date" class="cl-input${ddBad?' bad':r.dueDate?' ok':''}" value="${r.dueDate||''}" onchange="updateCleanerField(${r._idx},'dueDate',this.value)"/></td>
+      <td>
+        <input type="date" class="cl-input ${cdClass}" style="${cdBorderOverride}" value="${r.completedDate||''}" onchange="updateCleanerField(${r._idx},'completedDate',this.value)"/>
+        ${dateHints.length?`<div style="font-size:9px;color:#94A3B8;margin-top:2px;line-height:1.4;">${dateHints.join(' · ')}</div>`:''}
+      </td>
+      <td>${pills}</td>
+      <td>${resDropdown}</td>
+      <td><input class="remark-input" placeholder="${remarkPlaceholder}" value="${(r._remark||'').replace(/"/g,'&quot;')}" onchange="updateCleanerField(${r._idx},'_remark',this.value)"/></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateResolution(idx,value){
+  const row=CLEANER_ROWS.find(r=>r._idx===idx); if(!row)return;
+  row._resolution=value||null;
+  if(value==='corrected'&&row._created){row.completedDate=row._created;if(!row._remark)row._remark=`Corrected: completed date set to ticket-created date (${row._created})`;}
+  if(value==='cleared'){row.completedDate=null;if(!row._remark)row._remark='Completed date cleared';}
+  if(value==='accepted'&&!row._remark)row._remark='Backdated: work completed before ticket was created in Jira';
+  if(value==='flagged'&&!row._remark)row._remark='Flagged for manual review';
+  row._issues=detectIssues(row); renderCleanerSummary(); filterRows(_currentFilter);
+}
+function updateCleanerField(idx,field,value){
+  const row=CLEANER_ROWS.find(r=>r._idx===idx); if(!row)return;
+  if(field==='_remark'){row._remark=value;return;}
+  row[field]=value||null;
+  if(field==='summary')row.summary=value.replace(/[\u2013\u2014]/g,'-').replace(/\u00a0/g,' ').trim();
+  row._issues=detectIssues(row); renderCleanerSummary(); filterRows(_currentFilter);
+}
+
+function autoFixAll(){
+  const today=new Date().toISOString().slice(0,10);
+  let fixCount=0,autoAccepted=0,skippedBackdated=0;
+  CLEANER_ROWS.forEach(row=>{
+    row._issues.forEach(issue=>{
+      if(issue.conflictType==='lateTicket'&&!row._resolution){row._resolution='accepted';if(!row._remark)row._remark=`Ticket created late — work started ${row.startDate}, completed ${row.completedDate}, ticket ${row._created}`;autoAccepted++;fixCount++;return;}
+      if(issue.conflictType==='beforeStart'||issue.conflictType==='backdated'){skippedBackdated++;return;}
+      if(issue.fix==='useToday'&&!row.completedDate){row.completedDate=today;fixCount++;}
+      if(issue.fix==='clearCompleted'&&row.completedDate&&!row._resolution){row.completedDate=null;fixCount++;}
+      if(issue.fix==='fixChars'&&row.summary){const f=row.summary.replace(/[\u2013\u2014]/g,'-').replace(/\u00a0/g,' ').trim();if(f!==row.summary){row.summary=f;fixCount++;}}
+    });
+    row._issues=detectIssues(row);
+  });
+  const prog=document.getElementById('cleanerProgress'); prog.style.display='block';
+  let msg='';
+  if(autoAccepted)msg+=`✅ ${autoAccepted} "ticket created late" row(s) auto-accepted (Completed ≥ Start). `;
+  if(fixCount-autoAccepted>0)msg+=`⚡ ${fixCount-autoAccepted} other issue(s) fixed. `;
+  if(skippedBackdated>0){prog.style.background='#FFFBEB';prog.style.borderTop='1px solid #FDE68A';msg+=`<strong>⏮ ${skippedBackdated} row(s) need manual resolution below.</strong>`;}
+  else{prog.style.background='#ECFDF5';prog.style.borderTop='1px solid #6EE7B7';}
+  if(!msg)msg='ℹ️ Nothing to auto-fix — fill in any missing dates manually.';
+  prog.innerHTML=msg; renderCleanerSummary(); filterRows(_currentFilter);
+}
+
+function confirmCleanedData(){
+  const unresolved=CLEANER_ROWS.filter(r=>r._issues.some(i=>i.conflictType==='backdated')&&!r._resolution);
+  if(unresolved.length){const keys=unresolved.map(r=>r.id).join(', ');if(!confirm(`⚠️ ${unresolved.length} backdated row(s) have no resolution:\n${keys}\n\nGenerate report anyway?`))return;}
+  CLEANER_ROWS.forEach(cleaned=>{
+    const orig=STATE.issues.find(i=>i.id===cleaned.id); if(!orig)return;
+    orig.summary=cleaned.summary; orig.status=cleaned.status; orig.startDate=cleaned.startDate;
+    orig.dueDate=cleaned.dueDate; orig.completedDate=cleaned.completedDate;
+    const noteparts=[];
+    if(cleaned._resolution==='accepted')noteparts.push('⏮ Backdated');
+    if(cleaned._resolution==='corrected')noteparts.push('📅 Date corrected');
+    if(cleaned._resolution==='cleared')noteparts.push('🗑 Date cleared');
+    if(cleaned._resolution==='flagged')noteparts.push('🚩 Needs review');
+    if(cleaned._remark)noteparts.push(cleaned._remark);
+    if(noteparts.length)orig.labels=noteparts;
+  });
+  closeCleanerOverlay();
+  const es=document.getElementById('emptyState'); if(es)es.style.display='none';
+  document.getElementById('excelBtn').style.display='inline-block';
+  STATE.set(STATE.issues);
+  const errors=CLEANER_ROWS.filter(r=>r._issues.some(i=>i.type==='error')).length;
+  const backdated=CLEANER_ROWS.filter(r=>r._resolution==='accepted').length;
+  const flagged=CLEANER_ROWS.filter(r=>r._resolution==='flagged').length;
+  let msg=`✅ Report generated — ${STATE.issues.filter(i=>i.type!=='Epic').length} tasks`;
+  if(backdated)msg+=` · ${backdated} backdated accepted`;
+  if(flagged)msg+=` · ${flagged} flagged for review`;
+  if(errors)msg+=` · ${errors} unresolved error(s)`;
+  setStatus(msg,errors||flagged?'warn':'success');
+  // Update sidebar issues badge
+  if(errors||flagged){ document.getElementById('nav-errors').style.display='flex'; document.getElementById('nav-errors-badge').textContent=errors+flagged; }
+}
+
+/* ════════ CSV UPLOAD ═══════════════════════════════════════════════ */
+function handleCSVUpload(event){
+  const file=event.target.files[0]; if(!file)return;
+  setStatus(`📂 Reading "${file.name}"…`,'loading');
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const {issues,raw}=parseCSVData(e.target.result);
+      if(!issues.length)throw new Error('No valid issue rows found.');
+      STATE.issues=issues.map(i=>({...i}));
+      setStatus(`✅ "${file.name}" loaded — ${issues.length} issues · opening data cleaner…`,'success');
+      openCleanerOverlay(issues,raw);
+    } catch(err){ setStatus(`❌ CSV Error: ${err.message}`,'error'); }
+  };
+  reader.onerror=()=>setStatus('❌ File read failed','error');
+  reader.readAsText(file,'utf-8');
+}
+
+/* ════════ JIRA FETCH ═══════════════════════════════════════════════ */
+async function startFetch(){
+  setStatus('🔄 Fetching from Jira (GMEBIZ)…','loading');
+  document.getElementById('fetchBtn') && (document.getElementById('fetchBtn').disabled=true);
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:8000,
+        mcp_servers:[{type:'url',url:'https://mcp.atlassian.com/v1/sse',name:'atlassian'}],
+        messages:[{role:'user',content:`Fetch all issues from the GMEBIZ Jira project. 
+          For each issue return a JSON array with fields: id (issue key), summary, status, assignee, startDate (YYYY-MM-DD), dueDate (YYYY-MM-DD), completedDate (YYYY-MM-DD or null), type (Epic/Task/Sub-task), epicName, epicSummary, progress (0-100).
+          Return ONLY the JSON array, no other text. Max 200 issues.`}],
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.map(c=>c.text||'').join('');
+    const match=text.match(/\[[\s\S]*\]/); if(!match)throw new Error('No JSON array found in response');
+    const issues=JSON.parse(match[0]);
+    if(!Array.isArray(issues)||!issues.length)throw new Error('Empty or invalid issue list');
+    STATE.issues=issues.map(i=>({...i}));
+    openCleanerOverlay(issues,[]);
+    setStatus(`✅ Fetched ${issues.length} issues from Jira GMEBIZ`,'success');
+  } catch(err){ setStatus(`❌ Jira fetch failed: ${err.message}`,'error'); }
+  finally{ document.getElementById('fetchBtn') && (document.getElementById('fetchBtn').disabled=false); }
+}
+
+/* ════════ DATE MODAL ═══════════════════════════════════════════════ */
+function showDateModal(missing){
+  document.getElementById('missingDateRows').innerHTML=missing.map(i=>`
+    <tr>
+      <td style="font-family:var(--font-mono);font-weight:700;font-size:11px;color:var(--navy);">${i.id}</td>
+      <td style="font-size:11.5px;">${i.summary}</td>
+      <td style="text-align:center;font-size:10.5px;">${i.status}</td>
+      <td><input type="date" class="${i.startDate?'filled':'missing'}" data-id="${i.id}" data-field="startDate" value="${i.startDate||''}"/></td>
+      <td><input type="date" class="${i.dueDate?'filled':'missing'}" data-id="${i.id}" data-field="dueDate" value="${i.dueDate||''}"/></td>
+    </tr>`).join('');
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
+function confirmDates(){
+  document.querySelectorAll('#missingDateRows input').forEach(inp=>{
+    if(!inp.value)return;
+    const issue=STATE.issues.find(i=>i.id===inp.dataset.id);
+    if(issue)issue[inp.dataset.field]=inp.value;
+  });
+  closeModal(); renderBoth(); setStatus('✅ Dates confirmed — report updated.','success');
+}
+
+/* ════════ EXCEL DOWNLOAD (xlsx-js-style) ══════════════════════════ */
+function downloadExcel(){
+  if(!STATE.issues.length){alert('Load data first.');return;}
+  if(typeof XLSXStyle!=='undefined'){window.XLSX=XLSXStyle;buildExcel();}
+  else{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js';
+    s.onload=()=>{window.XLSX=window.XLSXStyle||window.XLSX;buildExcel();};
+    s.onerror=()=>{
+      const s2=document.createElement('script');
+      s2.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s2.onload=buildExcel; document.head.appendChild(s2);
+    };
+    document.head.appendChild(s);
+  }
+}
+function xFill(rgb){return{patternType:'solid',fgColor:{rgb},bgColor:{rgb:'FFFFFF'}};}
+function xBd(hex){const b={style:'thin',color:{rgb:hex||'DDDDDD'}};return{top:b,bottom:b,left:b,right:b};}
+const XS={
+  hDark :{font:{bold:true,color:{rgb:'FFFFFF'},sz:11},fill:xFill('0D1B4E'),alignment:{horizontal:'center',vertical:'center',wrapText:true},border:xBd('1E2E7A')},
+  hMid  :{font:{bold:true,color:{rgb:'C7D2FE'},sz:9}, fill:xFill('1E2E7A'),alignment:{horizontal:'center',vertical:'center'},               border:xBd('2563EB')},
+  hCur  :{font:{bold:true,color:{rgb:'FFFFFF'},sz:9}, fill:xFill('1D4ED8'),alignment:{horizontal:'center',vertical:'center'},               border:xBd('2563EB')},
+  proj  :{font:{bold:true,color:{rgb:'0D1B4E'},sz:11},fill:xFill('EEF2FF'),alignment:{horizontal:'center',vertical:'center',wrapText:true},  border:xBd('C7D2FE')},
+  task  :{font:{sz:10},                               fill:xFill('FFFFFF'),alignment:{vertical:'center',wrapText:true},                      border:xBd('E2E8F0')},
+  center:{font:{sz:10},                               fill:xFill('FFFFFF'),alignment:{horizontal:'center',vertical:'center'},                border:xBd('E2E8F0')},
+  pct   :{font:{bold:true,sz:11},                     fill:xFill('FFFFFF'),alignment:{horizontal:'center',vertical:'center'},                border:xBd('E2E8F0')},
+  done  :{font:{bold:true,color:{rgb:'FFFFFF'},sz:8}, fill:xFill('059669'),alignment:{horizontal:'center',vertical:'center'},                border:xBd('047857')},
+  prog  :{font:{bold:true,color:{rgb:'FFFFFF'},sz:8}, fill:xFill('D97706'),alignment:{horizontal:'center',vertical:'center'},                border:xBd('B45309')},
+  plan  :{font:{bold:true,color:{rgb:'78350F'},sz:8}, fill:xFill('FDE68A'),alignment:{horizontal:'center',vertical:'center'},                border:xBd('F59E0B')},
+  empty :{fill:xFill('F8FAFC'),                                                                                                               border:xBd('F1F5F9')},
+  summ  :{font:{bold:true,sz:11,color:{rgb:'0D1B4E'}},fill:xFill('E0E7FF'),alignment:{horizontal:'center',vertical:'center'},               border:xBd('818CF8')},
+  note  :{font:{italic:true,sz:10,color:{rgb:'94A3B8'}},fill:xFill('FAFAFA'),alignment:{horizontal:'center',vertical:'center'},             border:xBd('E2E8F0')},
+  ovGood:{font:{bold:true,color:{rgb:'FFFFFF'},sz:10},fill:xFill('059669'),alignment:{horizontal:'center',vertical:'center'},               border:xBd('047857')},
+  ovMid :{font:{bold:true,color:{rgb:'FFFFFF'},sz:10},fill:xFill('D97706'),alignment:{horizontal:'center',vertical:'center'},               border:xBd('B45309')},
+  ovLow :{font:{bold:true,color:{rgb:'FFFFFF'},sz:10},fill:xFill('DC2626'),alignment:{horizontal:'center',vertical:'center'},               border:xBd('B91C1C')},
+};
+function xc(ws,r,c,v,s){ws[XLSX.utils.encode_cell({r,c})]={v,t:typeof v==='number'?'n':'s',s};}
+function xOvStyle(pct){return pct>=80?XS.ovGood:pct>=40?XS.ovMid:XS.ovLow;}
+function xGantt(issue,wi){
+  const w=WEEKS[wi],start=issue.startDate?new Date(issue.startDate):null,due=issue.dueDate?new Date(issue.dueDate):null;
+  if(!start||!due)return{v:'',s:XS.empty};
+  if(!(w.start<=due&&w.end>=start))return{v:'',s:XS.empty};
+  const label=(due>=w.start&&due<=w.end)?`${due.getMonth()+1}/${due.getDate()}`:'';
+  const sl=(issue.status||'').toLowerCase();
+  return{v:label,s:isDoneStatus(sl)?XS.done:isProgStatus(sl)?XS.prog:XS.plan};
+}
+function buildExcel(){
+  if(typeof XLSXStyle!=='undefined')window.XLSX=XLSXStyle;
+  const wb=XLSX.utils.book_new();
+  buildProjectSheet(wb); buildDeveloperSheet(wb);
+  const d=new Date(),dt=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  XLSX.writeFile(wb,`GMEBIZ_Development_Status_${dt}.xlsx`);
+}
+function buildProjectSheet(wb){
+  const ws={};ws['!merges']=[];ws['!rows']=[];
+  const em=STATE.epicMap,F=4,A=F+12;
+  let R=0;
+  const setRow=(r,hpx)=>{ws['!rows'][r]={hpx};};
+  xc(ws,R,0,'GME BIZ Development Status / Project',XS.hDark);
+  for(let c=1;c<=A+5;c++)xc(ws,R,c,'',XS.hDark);
+  ws['!merges'].push({s:{r:R,c:0},e:{r:R,c:A+5}});setRow(R,28);R++;
+  ['No.','Project','Description','Task / Sub-task'].forEach((h,c)=>{xc(ws,R,c,h,XS.hDark);ws['!merges'].push({s:{r:R,c},e:{r:R+2,c}});});
+  let mc=F;
+  monthSpans().forEach(m=>{xc(ws,R,mc,m.label,XS.hDark);for(let c=mc+1;c<mc+m.span;c++)xc(ws,R,c,'',XS.hDark);ws['!merges'].push({s:{r:R,c:mc},e:{r:R,c:mc+m.span-1}});mc+=m.span;});
+  ['Weightage','Progress','Overall','Target Date','PIC','Developer'].forEach((h,i)=>{xc(ws,R,A+i,h,XS.hDark);ws['!merges'].push({s:{r:R,c:A+i},e:{r:R+2,c:A+i}});});
+  setRow(R,22);R++;
+  WEEKS.forEach((w,i)=>xc(ws,R,F+i,w.label,w.isCurrent?XS.hCur:XS.hMid));setRow(R,16);R++;
+  WEEKS.forEach((w,i)=>xc(ws,R,F+i,w.date,w.isCurrent?XS.hCur:XS.hMid));setRow(R,14);R++;
+  let no=1;
+  Object.values(em).forEach(epic=>{
+    if(!epic.tasks.length)return;
+    const pct=calcPct(epic.tasks),wt=Math.round(100/epic.tasks.length);
+    const due=epic.tasks.reduce((l,t)=>(!t.dueDate?l:(!l||t.dueDate>l?t.dueDate:l)),null);
+    const fr=R;
+    epic.tasks.forEach((task,idx)=>{
+      if(idx===0){xc(ws,R,0,no,XS.proj);xc(ws,R,1,epic.name,XS.proj);xc(ws,R,2,epic.description||'',XS.task);}
+      xc(ws,R,3,`${task.summary}\n(${task.id})`,XS.task);
+      WEEKS.forEach((_,wi)=>{const{v,s}=xGantt(task,wi);xc(ws,R,F+wi,v,s);});
+      xc(ws,R,A,`${wt}%`,XS.pct);xc(ws,R,A+1,`${calcPct([task])}%`,XS.pct);
+      if(idx===0){xc(ws,R,A+2,`${pct}%`,xOvStyle(pct));xc(ws,R,A+3,due||'—',XS.center);xc(ws,R,A+4,'Manoj',XS.center);xc(ws,R,A+5,[...epic.assignees].join('\n'),XS.task);}
+      setRow(R,36);R++;
+    });
+    if(epic.tasks.length>1)[0,1,2,A+2,A+3,A+4,A+5].forEach(c=>ws['!merges'].push({s:{r:fr,c},e:{r:R-1,c}}));
+    no++;
+  });
+  const tp=calcPct(STATE.issues.filter(i=>i.type!=='Epic'));
+  xc(ws,R,0,`📊 Overall — ${Object.keys(em).length} Projects · ${STATE.issues.filter(i=>i.type!=='Epic').length} Tasks`,XS.summ);
+  ws['!merges'].push({s:{r:R,c:0},e:{r:R,c:A+1}});for(let c=1;c<=A+1;c++)xc(ws,R,c,'',XS.summ);
+  xc(ws,R,A+2,`${tp}% Complete`,xOvStyle(tp));ws['!merges'].push({s:{r:R,c:A+2},e:{r:R,c:A+5}});
+  for(let c=A+3;c<=A+5;c++)xc(ws,R,c,'',xOvStyle(tp));setRow(R,22);
+  ws['!cols']=[{wch:5},{wch:18},{wch:30},{wch:40},...WEEKS.map(()=>({wch:5.5})),{wch:10},{wch:10},{wch:11},{wch:13},{wch:8},{wch:30}];
+  ws['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:R,c:A+5}});
+  XLSX.utils.book_append_sheet(wb,ws,'Project Status');
+}
+function buildDeveloperSheet(wb){
+  const ws={};ws['!merges']=[];
+  const dm=STATE.devMap,F=3,A=F+12;let R=0;
+  xc(ws,R,0,'GME BIZ Development Status / Developer',XS.hDark);
+  ws['!merges'].push({s:{r:R,c:0},e:{r:R,c:A+2}});R++;
+  ['No.','Developer','Task'].forEach((h,c)=>{xc(ws,R,c,h,XS.hDark);ws['!merges'].push({s:{r:R,c},e:{r:R+1,c}});});
+  let mc2=F;
+  monthSpans().forEach(m=>{xc(ws,R,mc2,m.label,XS.hDark);ws['!merges'].push({s:{r:R,c:mc2},e:{r:R,c:mc2+m.span-1}});mc2+=m.span;});
+  ['Progress','Target Date','Note'].forEach((h,i)=>{xc(ws,R,A+i,h,XS.hDark);ws['!merges'].push({s:{r:R,c:A+i},e:{r:R+1,c:A+i}});});R++;
+  WEEKS.forEach((w,i)=>xc(ws,R,F+i,`${w.label}\n${w.date}`,w.isCurrent?XS.hCur:XS.hMid));R++;
+  let no=1;
+  Object.entries(dm).forEach(([dev,tasks])=>{
+    const fr=R;
+    tasks.forEach((task,idx)=>{
+      if(idx===0){xc(ws,R,0,no,XS.proj);xc(ws,R,1,dev,XS.proj);}
+      xc(ws,R,2,`${task.summary} (${task.id})`,XS.task);
+      WEEKS.forEach((_,wi)=>{const{v,s}=xGantt(task,wi);xc(ws,R,F+wi,v,s);});
+      xc(ws,R,A,`${calcPct([task])}%`,XS.pct);xc(ws,R,A+1,task.dueDate||'—',XS.center);xc(ws,R,A+2,(task.labels||[]).join(', '),XS.note);R++;
+    });
+    if(tasks.length>1)[0,1].forEach(c=>ws['!merges'].push({s:{r:fr,c},e:{r:R-1,c}}));no++;
+  });
+  const tp=calcPct(STATE.issues.filter(i=>i.type!=='Epic'));
+  xc(ws,R,0,'Overall Progress',XS.summ);ws['!merges'].push({s:{r:R,c:0},e:{r:R,c:A}});
+  xc(ws,R,A+1,`${tp}%`,XS.summ);ws['!merges'].push({s:{r:R,c:A+1},e:{r:R,c:A+2}});
+  ws['!cols']=[{wch:5},{wch:16},{wch:42},...WEEKS.map(()=>({wch:5})),{wch:9},{wch:12},{wch:10}];
+  ws['!ref']=XLSX.utils.encode_range({s:{r:0,c:0},e:{r:R,c:A+2}});
+  XLSX.utils.book_append_sheet(wb,ws,'Developer Status');
+}
+</script>
+</body>
+</html>
