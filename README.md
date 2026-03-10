@@ -1,19 +1,23 @@
 # GME BIZ Development Status
 
-Internal development status dashboard for the GME BIZ team.
+## Deploy to Vercel
 
-## Features
-- 📋 Project Status Gantt chart (grouped by Epic/Category)
-- 👨‍💻 Developer Status view
-- 🧹 Data Cleaner with smart date conflict detection
-- 📊 Excel export (Project + Developer sheets)
-- 📈 KPI dashboard cards
+### Option A — Vercel CLI (fastest)
+```bash
+npm i -g vercel
+cd vercel-deploy
+vercel --prod
+```
 
-## Usage
-1. Open the site
-2. Click **Load CSV** and upload a Jira CSV export
-3. Review and fix issues in the Data Cleaner
-4. Click **Generate Report**
+### Option B — GitHub + Vercel Dashboard
+1. Push this folder to a GitHub repo
+2. Go to https://vercel.com/new
+3. Import your repo
+4. Settings:
+   - Framework: **Other**
+   - Build Command: *(leave empty)*
+   - Output Directory: `.` *(enable Override)*
+5. Click **Deploy**
 
-## Deploying updates
-Just push changes to `main` — Vercel auto-deploys.
+## Update the site
+Just push changes to GitHub → Vercel auto-deploys.
