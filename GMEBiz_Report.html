@@ -123,6 +123,90 @@ td.note { text-align:center; font-size:10px; color:#888; font-style:italic; }
 .empty-state { text-align:center; padding:60px 20px; color:#999; font-size:14px; line-height:2; }
 
 /* ═══════════════════════════════════════════
+   DATA CLEANER OVERLAY
+═══════════════════════════════════════════ */
+#cleanerOverlay {
+  display:none; position:fixed; inset:0; background:rgba(10,10,30,.72);
+  z-index:2000; justify-content:center; align-items:flex-start; padding:24px 16px; overflow-y:auto;
+}
+#cleanerOverlay.show { display:flex; }
+#cleanerBox {
+  background:#fff; border-radius:12px; width:100%; max-width:1200px;
+  box-shadow:0 12px 48px rgba(0,0,0,.4); overflow:hidden; animation: slideUp .25s ease;
+}
+@keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+#cleanerHead {
+  background:linear-gradient(135deg,#1a237e,#283593);
+  padding:16px 22px; display:flex; align-items:center; justify-content:space-between;
+}
+#cleanerHead h2 { color:#fff; font-size:16px; margin:0; }
+#cleanerHead .sub { color:#9fa8da; font-size:12px; margin-top:3px; }
+.cleaner-summary {
+  display:flex; gap:12px; padding:14px 22px; background:#f5f5f5;
+  border-bottom:1px solid #e0e0e0; flex-wrap:wrap;
+}
+.cs-badge {
+  display:flex; align-items:center; gap:6px; background:#fff;
+  border-radius:20px; padding:5px 12px; font-size:12px; font-weight:700;
+  border:1px solid #ddd; box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+.cs-badge.red   { border-color:#ef9a9a; background:#fff5f5; color:#c62828; }
+.cs-badge.amber { border-color:#ffe082; background:#fffde7; color:#e65100; }
+.cs-badge.green { border-color:#a5d6a7; background:#f1f8e9; color:#2e7d32; }
+.cs-badge.blue  { border-color:#90caf9; background:#e3f2fd; color:#1565c0; }
+.cleaner-toolbar {
+  padding:10px 22px; display:flex; gap:8px; align-items:center;
+  border-bottom:1px solid #e0e0e0; flex-wrap:wrap; background:#fafafa;
+}
+.cl-btn { padding:6px 14px; border:none; border-radius:4px; font-size:11.5px; font-weight:700; cursor:pointer; transition:.15s; }
+.cl-btn-fix  { background:#1976d2; color:#fff; }
+.cl-btn-fix:hover  { background:#1565c0; }
+.cl-btn-skip { background:#e0e0e0; color:#555; }
+.cl-btn-skip:hover { background:#bdbdbd; }
+.cl-btn-go   { background:#2e7d32; color:#fff; font-size:13px; padding:8px 22px; }
+.cl-btn-go:hover   { background:#1b5e20; }
+.cl-btn-cancel { background:#fff; color:#c62828; border:1px solid #ef9a9a; }
+.cl-btn-cancel:hover { background:#ffebee; }
+.filter-btns { display:flex; gap:4px; margin-left:auto; }
+.filter-btn { padding:5px 11px; border:1px solid #ddd; border-radius:12px; font-size:11px; font-weight:600; cursor:pointer; background:#fff; color:#555; transition:.12s; }
+.filter-btn.active { background:#1a237e; color:#fff; border-color:#1a237e; }
+#cleanerTableWrap { overflow-x:auto; max-height:52vh; overflow-y:auto; }
+table.cl-table { width:100%; border-collapse:collapse; font-size:11px; min-width:900px; }
+table.cl-table thead th {
+  background:#1a237e; color:#fff; padding:7px 8px; text-align:left;
+  white-space:nowrap; position:sticky; top:0; z-index:10;
+}
+table.cl-table tbody tr { border-bottom:1px solid #eee; }
+table.cl-table tbody tr:hover { background:#f5f5f5; }
+table.cl-table td { padding:5px 7px; vertical-align:middle; }
+table.cl-table td.row-num { text-align:center; color:#999; font-size:10px; width:28px; }
+.cl-tag { display:inline-block; padding:1px 7px; border-radius:8px; font-size:10px; font-weight:700; white-space:nowrap; }
+.cl-tag.done  { background:#c8e6c9; color:#1b5e20; }
+.cl-tag.prog  { background:#ffe0b2; color:#bf360c; }
+.cl-tag.test  { background:#e3f2fd; color:#0d47a1; }
+.cl-err { background:#fff3e0; }
+.cl-crit { background:#fff5f5; }
+.cl-issue-pill {
+  display:inline-block; padding:1px 6px; border-radius:4px; font-size:9.5px;
+  font-weight:700; margin:1px 2px; white-space:nowrap;
+}
+.pill-red   { background:#ffcdd2; color:#b71c1c; }
+.pill-amber { background:#ffe0b2; color:#bf360c; }
+.pill-blue  { background:#bbdefb; color:#0d47a1; }
+.pill-gray  { background:#f5f5f5; color:#555; border:1px solid #ddd; }
+input.cl-input {
+  width:100%; padding:3px 5px; border:1px solid #ddd; border-radius:3px;
+  font-size:11px; background:#fff;
+}
+input.cl-input.bad  { border-color:#e53935; background:#fff8f8; }
+input.cl-input.ok   { border-color:#43a047; background:#f1f8e9; }
+select.cl-select { width:100%; padding:3px 4px; border:1px solid #ddd; border-radius:3px; font-size:11px; }
+select.cl-select.bad { border-color:#e53935; background:#fff8f8; }
+.cl-footer { padding:14px 22px; border-top:1px solid #e0e0e0; display:flex; align-items:center; justify-content:space-between; background:#fafafa; flex-wrap:wrap; gap:10px; }
+.cl-footer-info { font-size:12px; color:#666; }
+#cleanerProgress { font-size:12px; color:#555; padding:8px 22px; background:#e8f5e9; display:none; border-top:1px solid #c8e6c9; }
+
+/* ═══════════════════════════════════════════
    PRINT
 ═══════════════════════════════════════════ */
 @media print {
@@ -160,31 +244,97 @@ td.note { text-align:center; font-size:10px; color:#888; font-style:italic; }
   <!-- CONTROLS -->
   <div class="controls">
     <button class="btn btn-fetch" id="fetchBtn" onclick="startFetch()">🔄 Fetch from Jira (GMEBIZ)</button>
-    <label class="btn btn-csv" style="background:#6a1b9a;color:#fff;cursor:pointer;" title="Upload a Jira CSV export">
+    <label class="btn" style="background:#6a1b9a;color:#fff;cursor:pointer;padding:8px 18px;border-radius:5px;font-size:12px;font-weight:700;" title="Upload a Jira CSV export">
       📂 Load CSV
       <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleCSVUpload(event)"/>
     </label>
     <button class="btn btn-print" onclick="window.print()">🖨️ Print Report</button>
-    <button class="btn btn-excel" id="excelBtn" onclick="downloadExcel()">⬇️ Download Excel</button>
+    <button class="btn btn-excel" id="excelBtn" onclick="downloadExcel()" style="display:none;">⬇️ Download Excel</button>
   </div>
 
   <!-- STATUS BAR -->
   <div class="status-bar" id="statusBar"></div>
 
-  <!-- MISSING DATA PANEL -->
-  <div id="missingDataPanel" style="display:none;margin-bottom:14px;"></div>
-
   <!-- TAB CONTENT -->
-  <div id="tab-project"   class="tab-content active">
-    <div class="empty-state">Click <strong>"Fetch from Jira"</strong> or <strong>"Load CSV"</strong> to load GMEBIZ project data.<br>
-    Both tabs will auto-populate and stay in sync.</div>
+  <div id="tab-project" class="tab-content active">
+    <div class="empty-state" id="emptyState">
+      <div style="font-size:48px;margin-bottom:16px;">📂</div>
+      <div style="font-size:16px;font-weight:700;color:#1a237e;margin-bottom:8px;">Upload your Jira CSV export to get started</div>
+      <div style="font-size:13px;color:#888;margin-bottom:20px;">Click <strong>"Load CSV"</strong> above — the data cleaner will open first so you can review and fix issues before the report generates.</div>
+      <label style="display:inline-block;background:#6a1b9a;color:#fff;padding:12px 28px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:700;">
+        📂 Choose CSV File
+        <input type="file" accept=".csv" style="display:none;" onchange="handleCSVUpload(event)"/>
+      </label>
+      <div style="margin-top:16px;font-size:11px;color:#aaa;">Supports Jira CSV exports — both "Issue key" and "Key" column formats</div>
+    </div>
   </div>
   <div id="tab-developer" class="tab-content">
-    <div class="empty-state">Click <strong>"Fetch from Jira"</strong> or <strong>"Load CSV"</strong> to load developer data.<br>
-    Same tasks as Project tab — grouped by assignee.</div>
+    <div class="empty-state">Upload a CSV using the button above to load developer data.</div>
   </div>
 
 </div><!-- /container -->
+
+<!-- ═══════ DATA CLEANER OVERLAY ═══════ -->
+<div id="cleanerOverlay">
+  <div id="cleanerBox">
+
+    <!-- Header -->
+    <div id="cleanerHead">
+      <div>
+        <h2>🧹 Data Cleaner — Review Before Generating Report</h2>
+        <div class="sub" id="cleanerSubtitle">Check and fix issues below, then click Generate Report</div>
+      </div>
+      <button class="cl-btn cl-btn-cancel" onclick="closeCleanerOverlay()">✕ Cancel</button>
+    </div>
+
+    <!-- Summary badges -->
+    <div class="cleaner-summary" id="cleanerSummary"></div>
+
+    <!-- Toolbar -->
+    <div class="cleaner-toolbar">
+      <button class="cl-btn cl-btn-fix" onclick="autoFixAll()">⚡ Auto-Fix All</button>
+      <button class="cl-btn cl-btn-skip" onclick="clearFilters()">📋 Show All Rows</button>
+      <div class="filter-btns">
+        <button class="filter-btn" id="flt-errors"  onclick="filterRows('errors')">❌ Errors Only</button>
+        <button class="filter-btn" id="flt-warn"    onclick="filterRows('warn')">⚠️ Warnings Only</button>
+        <button class="filter-btn active" id="flt-all" onclick="filterRows('all')">All Rows</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div id="cleanerTableWrap">
+      <table class="cl-table" id="cleanerTable">
+        <thead>
+          <tr>
+            <th style="width:28px;">#</th>
+            <th style="width:65px;">Key</th>
+            <th style="width:70px;">Type</th>
+            <th style="min-width:200px;">Summary</th>
+            <th style="width:90px;">Status</th>
+            <th style="width:88px;">Assignee</th>
+            <th style="width:100px;">Start Date</th>
+            <th style="width:100px;">Due Date</th>
+            <th style="width:100px;">Completed</th>
+            <th style="width:130px;">Issues Found</th>
+          </tr>
+        </thead>
+        <tbody id="cleanerBody"></tbody>
+      </table>
+    </div>
+
+    <div id="cleanerProgress">✅ Auto-fix applied — review highlighted rows above.</div>
+
+    <!-- Footer -->
+    <div class="cl-footer">
+      <div class="cl-footer-info" id="cleanerFooterInfo">—</div>
+      <div style="display:flex;gap:10px;">
+        <button class="cl-btn cl-btn-skip" onclick="closeCleanerOverlay()">Cancel</button>
+        <button class="cl-btn cl-btn-go"   onclick="confirmCleanedData()">✅ Generate Report →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <!-- DATE MODAL -->
 <div class="modal-overlay" id="modalOverlay">
@@ -545,9 +695,12 @@ function setStatus(msg, type) {
 function parseMonthDate(str) {
   if (!str || !str.trim()) return null;
   str = str.trim();
-  // Handle "Feb 2, 2026" or "Feb 02, 2026"
+  // ISO format YYYY-MM-DD (possibly with time)
+  const iso = str.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (iso) return iso[1];
+  // "Feb 2, 2026" or "Feb 02, 2026"
   const m = str.match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
-  if (!m) return str; // already ISO or unknown
+  if (!m) return null;
   const months = { Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',
                    Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12' };
   const mo = months[m[1].charAt(0).toUpperCase()+m[1].slice(1,3).toLowerCase()];
@@ -577,119 +730,394 @@ function parseCSVData(text) {
     const obj = {};
     headers.forEach((h, i) => obj[h] = (vals[i] || '').trim());
     return obj;
-  }).filter(r => r['Issue key']);
-
-  // Separate epics and tasks
-  const epicRows = rows.filter(r => r['Issue Type'] === 'Epic');
-  const taskRows = rows.filter(r => r['Issue Type'] !== 'Epic');
-
-  // Find which epics have child tasks
-  const epicByKey = {};
-  epicRows.forEach(e => epicByKey[e['Issue key']] = e);
-  const epicsWithChildren = new Set();
-  taskRows.forEach(t => {
-    const pk = (t['Parent'] || '').split(' ')[0].trim();
-    if (epicByKey[pk]) epicsWithChildren.add(pk);
+  }).filter(r => {
+    // Support both "Key" and "Issue key" column names
+    const k = r['Key'] || r['Issue key'] || '';
+    return k.trim().length > 0;
   });
+
+  if (!rows.length) throw new Error('No data rows found. Check the CSV has a Key or Issue key column.');
+
+  // Normalise each row into a consistent shape
+  const normalise = r => ({
+    key          : r['Key'] || r['Issue key'] || '',
+    summary      : (r['Summary'] || '').replace(/[\u2013\u2014]/g,'—').replace(/\u00a0/g,' ').trim(),
+    assignee     : r['Assignee'] || '',
+    status       : r['Status Category'] || r['Status'] || '',
+    statusRaw    : r['Status'] || '',
+    startDate    : parseMonthDate(r['Start date']),
+    dueDate      : parseMonthDate(r['Due date']),
+    completedDate: parseMonthDate(r['Completed Date']) || null,
+    created      : parseMonthDate(r['Created']) || null,
+    progress     : parseFloat(r['Progress(%)']) || 0,
+    timeSpent    : r['Time Spent'] || null,
+    issueType    : (r['Issue Type'] || 'Task').trim(),
+    parent       : (r['Parent'] || '').trim(),
+    projectCat   : (r['Project Category'] || '').trim(),
+    reporter     : r['Reporter'] || '',
+    labels       : [r['Status'] || ''],
+  });
+
+  const normRows = rows.map(normalise);
+
+  // ── Determine grouping strategy ──────────────────────────────
+  // Priority: Epic rows with Parent links → Project Category → General
+  const epicRows  = normRows.filter(r => r.issueType === 'Epic');
+  const taskRows  = normRows.filter(r => r.issueType !== 'Epic');
+  const hasEpics  = epicRows.length > 0;
+  const hasParent = taskRows.some(r => r.parent.length > 0);
+  const hasCat    = taskRows.some(r => r.projectCat.length > 0);
+
+  // Build epic key → summary map
+  const epicBySummaryKey = {}; // "GBP-2426" -> epic row
+  epicRows.forEach(e => { epicBySummaryKey[e.key] = e; });
 
   const issues = [];
 
-  epicRows.forEach(row => {
-    const epicName = row['Summary'];
-    // Always add the Epic entry (for groupByEpic to create the group)
-    issues.push({
-      id         : row['Issue key'],
-      summary    : epicName,
-      assignee   : row['Assignee'],
-      status     : row['Status Category'] || row['Status'],
-      startDate  : parseMonthDate(row['Start date']),
-      dueDate    : parseMonthDate(row['Due date']),
-      completedDate: parseMonthDate(row['Completed Date']) || null,
-      progress   : parseFloat(row['Progress(%)']) || 0,
-      timeSpent  : row['Time Spent'] || null,
-      type       : 'Epic',
-      epicName   : epicName,
-      epicSummary: '',
-      labels     : [row['Status']],
-    });
-    // Standalone Epics (no child tasks): add a self-task so they appear in the table
-    if (!epicsWithChildren.has(row['Issue key'])) {
+  if (hasEpics && hasParent) {
+    // Classic mode: Epic rows + Parent links
+    epicRows.forEach(e => {
       issues.push({
-        id         : row['Issue key'],
-        summary    : epicName,
-        assignee   : row['Assignee'],
-        status     : row['Status Category'] || row['Status'],
-        startDate  : parseMonthDate(row['Start date']),
-        dueDate    : parseMonthDate(row['Due date']),
-        completedDate: parseMonthDate(row['Completed Date']) || null,
-        progress   : parseFloat(row['Progress(%)']) || 0,
-        timeSpent  : row['Time Spent'] || null,
-        type       : 'Task',
-        epicName   : epicName,
-        epicSummary: '',
-        labels     : [row['Status']],
+        id: e.key, summary: e.summary, assignee: e.assignee,
+        status: e.status, startDate: e.startDate, dueDate: e.dueDate,
+        completedDate: e.completedDate, progress: e.progress,
+        type: 'Epic', epicName: e.summary, epicSummary: '',
+        labels: e.labels, _created: e.created,
       });
-    }
-  });
-
-  taskRows.forEach(row => {
-    const parentStr = row['Parent'] || '';
-    const parentKey = parentStr.split(' ')[0].trim();
-    const parentEpic = epicByKey[parentKey];
-    const epicName = parentEpic ? parentEpic['Summary'] : (parentStr || 'General');
-    issues.push({
-      id         : row['Issue key'],
-      summary    : row['Summary'],
-      assignee   : row['Assignee'],
-      status     : row['Status Category'] || row['Status'],
-      startDate  : parseMonthDate(row['Start date']),
-      dueDate    : parseMonthDate(row['Due date']),
-      completedDate: parseMonthDate(row['Completed Date']) || null,
-      progress   : parseFloat(row['Progress(%)']) || 0,
-      timeSpent  : row['Time Spent'] || null,
-      type       : 'Task',
-      epicName   : epicName,
-      epicSummary: '',
-      labels     : [row['Status']],
     });
-  });
+    // Find which epics have children
+    const epicsWithChildren = new Set();
+    taskRows.forEach(t => {
+      const pk = t.parent.split(' ')[0].trim();
+      if (epicBySummaryKey[pk]) epicsWithChildren.add(pk);
+    });
+    // Standalone epics → self-task
+    epicRows.filter(e => !epicsWithChildren.has(e.key)).forEach(e => {
+      issues.push({
+        id: e.key, summary: e.summary, assignee: e.assignee,
+        status: e.status, startDate: e.startDate, dueDate: e.dueDate,
+        completedDate: e.completedDate, progress: e.progress,
+        type: 'Task', epicName: e.summary, epicSummary: '',
+        labels: e.labels, _created: e.created,
+      });
+    });
+    // Child tasks
+    taskRows.forEach(t => {
+      const pk = t.parent.split(' ')[0].trim();
+      const parentEpic = epicBySummaryKey[pk];
+      issues.push({
+        id: t.key, summary: t.summary, assignee: t.assignee,
+        status: t.status, startDate: t.startDate, dueDate: t.dueDate,
+        completedDate: t.completedDate, progress: t.progress,
+        type: 'Task', epicName: parentEpic ? parentEpic.summary : (t.parent || 'General'),
+        epicSummary: '', labels: t.labels, _created: t.created,
+      });
+    });
+  } else if (hasCat) {
+    // Category-based grouping: use Project Category as the epic group
+    // Create synthetic Epic entries per unique category
+    const cats = [...new Set(taskRows.map(r => r.projectCat || 'General'))];
+    cats.forEach(cat => {
+      issues.push({
+        id: 'CAT-' + cat.replace(/\s+/g,'-').slice(0,20),
+        summary: cat, assignee: '', status: 'In Progress',
+        startDate: null, dueDate: null, completedDate: null, progress: 0,
+        type: 'Epic', epicName: cat, epicSummary: '', labels: [], _created: null,
+      });
+    });
+    taskRows.forEach(t => {
+      issues.push({
+        id: t.key, summary: t.summary, assignee: t.assignee,
+        status: t.status, startDate: t.startDate, dueDate: t.dueDate,
+        completedDate: t.completedDate, progress: t.progress,
+        type: 'Task', epicName: t.projectCat || 'General',
+        epicSummary: '', labels: t.labels, _created: t.created,
+      });
+    });
+  } else {
+    // Fallback: all tasks under General
+    taskRows.forEach(t => {
+      issues.push({
+        id: t.key, summary: t.summary, assignee: t.assignee,
+        status: t.status, startDate: t.startDate, dueDate: t.dueDate,
+        completedDate: t.completedDate, progress: t.progress,
+        type: 'Task', epicName: 'General',
+        epicSummary: '', labels: t.labels, _created: t.created,
+      });
+    });
+  }
 
-  return { issues, raw: rows };
+  return { issues, raw: normRows };
 }
 
-function buildMissingPanel(rawRows) {
-  const missingTime = rawRows.filter(r => !r['Time Spent']);
-  const missingComplete = rawRows.filter(r => !r['Completed Date'] && (r['Status Category']==='Done'||r['Status']==='Done'));
-  const missingDates = rawRows.filter(r => !r['Start date'] || !r['Due date']);
+/* ════════════════════════════════════════════════════════
+   CLEANER STATE
+════════════════════════════════════════════════════════ */
+let CLEANER_ROWS = []; // working copy for the cleaner table
 
-  if (!missingTime.length && !missingComplete.length && !missingDates.length) {
-    document.getElementById('missingDataPanel').style.display = 'none';
+/* ════════════════════════════════════════════════════════
+   10b. ISSUE DETECTOR — returns array of {type,msg,fix?}
+════════════════════════════════════════════════════════ */
+function detectIssues(row) {
+  const issues = [];
+  const s  = (row.status || '').toLowerCase();
+  const cd = row.completedDate;
+  const sd = row.startDate;
+  const dd = row.dueDate;
+  const cr = row._created;
+
+  // Missing start date
+  if (!sd && row.type !== 'Epic')
+    issues.push({ type:'error', field:'startDate', msg:'Missing Start Date', fix:'leave' });
+
+  // Missing due date
+  if (!dd)
+    issues.push({ type:'error', field:'dueDate', msg:'Missing Due Date', fix:'leave' });
+
+  // Done but no Completed Date
+  if (isDoneStatus(s) && !cd)
+    issues.push({ type:'error', field:'completedDate', msg:'Done → no Completed Date', fix:'useToday' });
+
+  // Not done but has Completed Date
+  if (!isDoneStatus(s) && cd)
+    issues.push({ type:'error', field:'completedDate', msg:`${row.status} but has Completed Date`, fix:'clearCompleted' });
+
+  // Completed before Created
+  if (cd && cr && cd < cr)
+    issues.push({ type:'error', field:'completedDate', msg:`Completed (${cd}) before Created (${cr})`, fix:'clearCompleted' });
+
+  // Due before Created
+  if (dd && cr && dd < cr)
+    issues.push({ type:'warn', field:'dueDate', msg:`Due (${dd}) before Created (${cr})`, fix:'leave' });
+
+  // Non-breaking spaces or special chars in summary
+  if (row.summary && /[\u00a0\u2013\u2014]/.test(row.summary))
+    issues.push({ type:'warn', field:'summary', msg:'Special chars (em/en dash, NBSP)', fix:'fixChars' });
+
+  // Missing Parent (non-Epic tasks go to "General")
+  if (row.type !== 'Epic' && !row.epicName)
+    issues.push({ type:'warn', field:'epicName', msg:'No parent Epic — goes to General group', fix:'leave' });
+
+  return issues;
+}
+
+/* ════════════════════════════════════════════════════════
+   10c. CLEANER UI — build and open overlay
+════════════════════════════════════════════════════════ */
+function openCleanerOverlay(parsedIssues, rawRows) {
+  // Build working copy with all issue detection
+  CLEANER_ROWS = parsedIssues
+    .filter(r => r.type !== 'Epic')  // only show actionable rows
+    .map((r, idx) => ({
+      ...r,
+      _idx    : idx,
+      _issues : detectIssues(r),
+    }));
+
+  renderCleanerSummary();
+  renderCleanerTable(CLEANER_ROWS);
+  document.getElementById('cleanerProgress').style.display = 'none';
+  document.getElementById('cleanerOverlay').classList.add('show');
+}
+
+function closeCleanerOverlay() {
+  document.getElementById('cleanerOverlay').classList.remove('show');
+}
+
+function renderCleanerSummary() {
+  const errors   = CLEANER_ROWS.filter(r => r._issues.some(i => i.type === 'error'));
+  const warnings = CLEANER_ROWS.filter(r => r._issues.some(i => i.type === 'warn') && !r._issues.some(i => i.type === 'error'));
+  const clean    = CLEANER_ROWS.filter(r => !r._issues.length);
+  const total    = CLEANER_ROWS.length;
+
+  document.getElementById('cleanerSummary').innerHTML = `
+    <div class="cs-badge blue">📋 ${total} rows</div>
+    <div class="cs-badge red">❌ ${errors.length} error${errors.length!==1?'s':''}</div>
+    <div class="cs-badge amber">⚠️ ${warnings.length} warning${warnings.length!==1?'s':''}</div>
+    <div class="cs-badge green">✅ ${clean.length} clean</div>
+  `;
+  document.getElementById('cleanerFooterInfo').textContent =
+    errors.length
+      ? `⚠️ ${errors.length} error(s) need attention — you can still generate or fix first`
+      : warnings.length
+        ? `${warnings.length} minor warning(s) — safe to generate`
+        : `All data looks clean — ready to generate!`;
+
+  document.getElementById('cleanerSubtitle').textContent =
+    `${total} tasks from CSV · ${errors.length} errors · ${warnings.length} warnings`;
+}
+
+let _currentFilter = 'all';
+function filterRows(f) {
+  _currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`flt-${f}`)?.classList.add('active');
+  const filtered = f === 'errors' ? CLEANER_ROWS.filter(r => r._issues.some(i=>i.type==='error'))
+                 : f === 'warn'   ? CLEANER_ROWS.filter(r => r._issues.length > 0)
+                 : CLEANER_ROWS;
+  renderCleanerTable(filtered);
+}
+function clearFilters() { filterRows('all'); }
+
+function renderCleanerTable(rows) {
+  const tbody = document.getElementById('cleanerBody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:28px;color:#999;">No rows match this filter.</td></tr>`;
     return;
   }
 
-  let html = `<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:10px 14px;font-size:11.5px;">
-    <div style="font-weight:700;color:#f57f17;margin-bottom:8px;">⚠️ Missing Data Summary (${rawRows.length} rows checked)</div>
-    <div style="display:flex;gap:24px;flex-wrap:wrap;">`;
+  const statusOpts = ['Done','In Progress','Testing','To Do'].map(v =>
+    `<option value="${v}">${v}</option>`).join('');
 
-  if (missingDates.length) {
-    html += `<div><span style="color:#c62828;font-weight:700;">❌ Missing Start/Due Date (${missingDates.length})</span><ul style="margin:4px 0 0 14px;line-height:1.8;">`;
-    missingDates.forEach(r => html += `<li>${r['Issue key']} — ${r['Summary'].substring(0,45)}</li>`);
-    html += `</ul></div>`;
+  tbody.innerHTML = rows.map((r, displayIdx) => {
+    const hasErr  = r._issues.some(i=>i.type==='error');
+    const hasWarn = r._issues.some(i=>i.type==='warn');
+    const rowCls  = hasErr ? 'cl-crit' : hasWarn ? 'cl-err' : '';
+
+    const pills = r._issues.map(i =>
+      `<span class="cl-issue-pill ${i.type==='error'?'pill-red':'pill-amber'}">${i.msg}</span>`
+    ).join('') || `<span class="cl-issue-pill pill-gray">✅ Clean</span>`;
+
+    const statusCls = isDoneStatus((r.status||'').toLowerCase()) ? 'done'
+                    : isProgStatus((r.status||'').toLowerCase()) ? 'prog' : 'test';
+
+    const sdBad  = !r.startDate     && r.type !== 'Epic';
+    const ddBad  = !r.dueDate;
+    const cdBad  = isDoneStatus((r.status||'').toLowerCase()) && !r.completedDate;
+    const cdWarn = !isDoneStatus((r.status||'').toLowerCase()) && r.completedDate;
+
+    return `<tr class="${rowCls}" data-rowidx="${r._idx}">
+      <td class="row-num">${displayIdx+1}</td>
+      <td style="font-weight:700;font-size:10px;color:#1a237e;white-space:nowrap;">${r.id}</td>
+      <td><span class="cl-tag ${statusCls}" style="background:#e8eaf6;color:#1a237e;">${r.type||'Task'}</span></td>
+      <td>
+        <input class="cl-input${r._issues.some(i=>i.field==='summary')?' bad':''}"
+          value="${(r.summary||'').replace(/"/g,'&quot;')}"
+          onchange="updateCleanerField(${r._idx},'summary',this.value)"
+          style="font-size:10.5px;"/>
+      </td>
+      <td>
+        <select class="cl-select${cdBad||cdWarn?' bad':''}"
+          onchange="updateCleanerField(${r._idx},'status',this.value)">
+          ${['Done','In Progress','Testing','To Do'].map(v=>
+            `<option${v===r.status?' selected':''}>${v}</option>`).join('')}
+        </select>
+      </td>
+      <td style="font-size:10px;white-space:nowrap;">${r.assignee||'—'}</td>
+      <td>
+        <input type="date" class="cl-input${sdBad?' bad':!sdBad&&r.startDate?' ok':''}"
+          value="${r.startDate||''}"
+          onchange="updateCleanerField(${r._idx},'startDate',this.value)"/>
+      </td>
+      <td>
+        <input type="date" class="cl-input${ddBad?' bad':!ddBad?' ok':''}"
+          value="${r.dueDate||''}"
+          onchange="updateCleanerField(${r._idx},'dueDate',this.value)"/>
+      </td>
+      <td>
+        <input type="date" class="cl-input${cdBad?' bad':cdWarn?' bad':r.completedDate?' ok':''}"
+          value="${r.completedDate||''}"
+          onchange="updateCleanerField(${r._idx},'completedDate',this.value)"/>
+      </td>
+      <td>${pills}</td>
+    </tr>`;
+  }).join('');
+}
+
+function updateCleanerField(idx, field, value) {
+  const row = CLEANER_ROWS.find(r => r._idx === idx);
+  if (!row) return;
+  row[field] = value || null;
+  // clean up summary special chars on edit
+  if (field === 'summary') {
+    row.summary = value.replace(/[\u2013\u2014]/g, '-').replace(/\u00a0/g, ' ').trim();
   }
-  if (missingTime.length) {
-    html += `<div><span style="color:#e65100;font-weight:700;">⏱️ Missing Time Spent (${missingTime.length})</span><ul style="margin:4px 0 0 14px;line-height:1.8;">`;
-    missingTime.forEach(r => html += `<li>${r['Issue key']} — ${r['Summary'].substring(0,45)}</li>`);
-    html += `</ul></div>`;
+  row._issues = detectIssues(row);
+  renderCleanerSummary();
+  // re-render just this row's pills and classes
+  const tr = document.querySelector(`tr[data-rowidx="${idx}"]`);
+  if (tr) {
+    const hasErr  = row._issues.some(i=>i.type==='error');
+    const hasWarn = row._issues.some(i=>i.type==='warn');
+    tr.className  = hasErr ? 'cl-crit' : hasWarn ? 'cl-err' : '';
+    const pillTd  = tr.querySelector('td:last-child');
+    if (pillTd) pillTd.innerHTML = row._issues.map(i =>
+      `<span class="cl-issue-pill ${i.type==='error'?'pill-red':'pill-amber'}">${i.msg}</span>`
+    ).join('') || `<span class="cl-issue-pill pill-gray">✅ Clean</span>`;
+    // update input highlight classes
+    tr.querySelectorAll('input.cl-input').forEach(inp => {
+      inp.classList.remove('bad','ok');
+      if (inp.type === 'date') {
+        if (inp.value) inp.classList.add('ok'); else inp.classList.add('bad');
+      }
+    });
   }
-  if (missingComplete.length) {
-    html += `<div><span style="color:#558b2f;font-weight:700;">📅 Missing Completed Date (Done items, ${missingComplete.length})</span><ul style="margin:4px 0 0 14px;line-height:1.8;">`;
-    missingComplete.forEach(r => html += `<li>${r['Issue key']} — ${r['Summary'].substring(0,45)}</li>`);
-    html += `</ul></div>`;
-  }
-  html += `</div></div>`;
-  const panel = document.getElementById('missingDataPanel');
-  panel.innerHTML = html;
-  panel.style.display = 'block';
+}
+
+/* ════════════════════════════════════════════════════════
+   AUTO-FIX ALL
+════════════════════════════════════════════════════════ */
+function autoFixAll() {
+  const today = new Date().toISOString().slice(0,10);
+  let fixCount = 0;
+
+  CLEANER_ROWS.forEach(row => {
+    row._issues.forEach(issue => {
+      if (issue.fix === 'useToday' && !row.completedDate) {
+        row.completedDate = today; fixCount++;
+      }
+      if (issue.fix === 'clearCompleted' && row.completedDate) {
+        row.completedDate = null; fixCount++;
+      }
+      if (issue.fix === 'fixChars' && row.summary) {
+        const fixed = row.summary.replace(/[\u2013\u2014]/g,'-').replace(/\u00a0/g,' ').trim();
+        if (fixed !== row.summary) { row.summary = fixed; fixCount++; }
+      }
+    });
+    row._issues = detectIssues(row);
+  });
+
+  document.getElementById('cleanerProgress').style.display = 'block';
+  document.getElementById('cleanerProgress').textContent =
+    fixCount ? `⚡ Auto-fixed ${fixCount} issue(s) — review remaining items above.`
+             : `ℹ️ Nothing to auto-fix — manual date entry needed for missing dates.`;
+
+  renderCleanerSummary();
+  filterRows(_currentFilter);
+}
+
+/* ════════════════════════════════════════════════════════
+   CONFIRM — merge cleaned rows back and render report
+════════════════════════════════════════════════════════ */
+function confirmCleanedData() {
+  // Merge cleaned task data back into the full issue list
+  CLEANER_ROWS.forEach(cleaned => {
+    const orig = STATE.issues.find(i => i.id === cleaned.id);
+    if (orig) {
+      orig.summary       = cleaned.summary;
+      orig.status        = cleaned.status;
+      orig.startDate     = cleaned.startDate;
+      orig.dueDate       = cleaned.dueDate;
+      orig.completedDate = cleaned.completedDate;
+    }
+  });
+
+  closeCleanerOverlay();
+
+  // Hide empty state, show Excel button
+  const es = document.getElementById('emptyState');
+  if (es) es.style.display = 'none';
+  document.getElementById('excelBtn').style.display = 'inline-block';
+
+  STATE.set(STATE.issues);
+
+  const errors = CLEANER_ROWS.filter(r => r._issues.some(i=>i.type==='error')).length;
+  setStatus(
+    errors
+      ? `✅ Report generated — ${errors} unresolved item(s). Check Gantt bars for affected rows.`
+      : `✅ All data clean — report generated (${STATE.issues.filter(i=>i.type!=='Epic').length} tasks · ${Object.keys(STATE.epicMap).length} projects)`,
+    errors ? 'warn' : 'success'
+  );
 }
 
 function handleCSVUpload(event) {
@@ -701,22 +1129,16 @@ function handleCSVUpload(event) {
     try {
       const { issues, raw } = parseCSVData(e.target.result);
       if (!issues.length) throw new Error('No valid issue rows found in CSV.');
-      buildMissingPanel(raw);
-      const missing = issues.filter(i => i.type !== 'Epic' && (!i.startDate || !i.dueDate));
-      if (missing.length) {
-        STATE.issues = issues.map(i => ({...i}));
-        setStatus(`⚠️ Loaded ${raw.length} rows — ${missing.length} task(s) missing dates. Assign below.`, 'warn');
-        showDateModal(missing);
-      } else {
-        STATE.set(issues);
-        setStatus(`✅ Loaded "${file.name}" — ${raw.length} rows · ${Object.keys(STATE.epicMap).length} projects · ${Object.keys(STATE.devMap).length} developers`, 'success');
-      }
+      // Store issues in STATE temporarily so cleaner can write back
+      STATE.issues = issues.map(i => ({...i}));
+      // Open cleaner instead of rendering directly
+      openCleanerOverlay(issues, raw);
+      setStatus(`📂 "${file.name}" loaded — ${raw.length} rows ready for review`, 'warn');
     } catch(err) {
       setStatus(`❌ CSV Error: ${err.message}`, 'error');
     }
   };
   reader.readAsText(file);
-  // reset input so same file can be re-uploaded
   event.target.value = '';
 }
 
@@ -1021,45 +1443,6 @@ function buildDeveloperSheet(wb) {
   ws['!ref']  = XLSX.utils.encode_range({s:{r:0,c:0},e:{r:R,c:A+2}});
   XLSX.utils.book_append_sheet(wb, ws, 'Developer Status');
 }
-
-/* ════════════════════════════════════════════════════════
-   13. AUTO-LOAD EMBEDDED CSV ON PAGE START
-════════════════════════════════════════════════════════ */
-const EMBEDDED_CSV = `WBS,Issue key,Summary,Assignee,Status,Time Spent,Start date,Progress(%),Reporter,Completed Date,Due date,Priority,Issue Type,Parent,Status Category,Σ Time Spent
-39,GBP-2197,3.04 IME London (Europe),MANOJ SUBEDI,Done,,"Feb 2, 2026",100,MANOJ SUBEDI,"Mar 6, 2026","Mar 31, 2026",Medium,Epic, ,Done,2d 12h 30m
-59,GBP-2241,4.03 Reconciliation Team support ,MANOJ SUBEDI,Done,3h,"Jan 1, 2026",100,MANOJ SUBEDI,"Mar 5, 2026","Feb 28, 2026",Medium,Epic, ,Done,16h
-43,GBP-2201,3.08 SendMN (Mongolia),MANOJ SUBEDI,Done,,"Feb 16, 2026",100,MANOJ SUBEDI,"Mar 5, 2026","Mar 31, 2026",Medium,Epic, ,Done,22h
-4,GBP-2160,1.3 C2B,MANOJ SUBEDI,Done,4d 7h,"Jan 1, 2026",100,MANOJ SUBEDI,"Mar 2, 2026","Mar 31, 2026",Medium,Epic, ,Done,5d 17h
-67,GBP-2426,2.32 Using AI for Coding inside our GMEBiz System,MANOJ SUBEDI,In Progress,,"Feb 23, 2026",30,MANOJ SUBEDI,,"Mar 31, 2026",Medium,Epic, ,In Progress,1d 6h
-67.10,GBP-2469,2.35.10  Gap analysis of GMEBiz system with Others fintech,MANOJ SUBEDI,Done,,"Mar 5, 2026",100,MANOJ SUBEDI,"Mar 5, 2026","Mar 13, 2026",Medium,Task,GBP-2426 2.32 Using AI for Coding inside our GMEBiz System,Done,
-67.11,GBP-2470,2.35.11  GMEBiz and Partner Static values compared,MANOJ SUBEDI,Done,2h,"Mar 5, 2026",100,MANOJ SUBEDI,"Mar 5, 2026","Mar 13, 2026",Medium,Task,GBP-2426 2.32 Using AI for Coding inside our GMEBiz System,Done,2h
-67.3,GBP-2429,2.35.03 Documentation of GMEBiz using ClaudeCode,MANOJ SUBEDI,Done,,"Feb 25, 2026",100,MANOJ SUBEDI,"Feb 25, 2026","Feb 27, 2026",Medium,Task,GBP-2426 2.32 Using AI for Coding inside our GMEBiz System,Done,
-67.4,GBP-2430,2.35.04 Used ClaudeAI to find out the mistakes in partner setup ,MANOJ SUBEDI,Done,3h,"Feb 25, 2026",100,MANOJ SUBEDI,"Feb 25, 2026","Feb 27, 2026",Medium,Task,GBP-2426 2.32 Using AI for Coding inside our GMEBiz System,Done,3h
-67.5,GBP-2431,2.35.05 Fix the Merchant setup issue using AI,MANOJ SUBEDI,Done,8h,"Feb 24, 2026",100,MANOJ SUBEDI,"Feb 25, 2026","Feb 27, 2026",Medium,Task,GBP-2426 2.32 Using AI for Coding inside our GMEBiz System,Done,8h
-67.2,GBP-2428,2.35.02 Installation of Claude Code Agent,MANOJ SUBEDI,Done,,"Feb 24, 2026",100,MANOJ SUBEDI,"Feb 24, 2026","Feb 27, 2026",Medium,Task,GBP-2426 2.32 Using AI for Coding inside our GMEBiz System,Done,
-67.1,GBP-2427,2.35.01 Installation of OpenClaw Agentic Tool,MANOJ SUBEDI,Done,8h,"Feb 23, 2026",100,MANOJ SUBEDI,"Feb 23, 2026","Feb 27, 2026",Medium,Task,GBP-2426 2.32 Using AI for Coding inside our GMEBiz System,Done,8h
-66,GBP-2360,2.34 Service Fee Configuration by Payout Currency (Charge in Collection Currency),MANOJ SUBEDI,Testing,,"Feb 24, 2026",50,Pramod Parajuli,,"Mar 31, 2026",Medium,Epic, ,Testing,1d 1h
-64,GBP-2356,1.04 Bank gateway service improvement,Ronak Singh Karki,In Progress,14h,"Mar 2, 2026",5,MANOJ SUBEDI,,"Apr 10, 2026",Medium,Epic, ,In Progress,1d 20h 30m
-1,GBP-2105,1.01 Make Payment,Subash Poudel,In Progress,,"Feb 1, 2026",0.8,MANOJ SUBEDI,,"Mar 31, 2026",Medium,Epic, ,In Progress,2d 2h 4m
-61,GBP-2258,3.21 Paywho (China),Manohar Bhattarai,In Progress,,"Feb 3, 2026",50,MANOJ SUBEDI,,"Mar 31, 2026",Medium,Epic, ,In Progress,1h
-8,GBP-2164,2.04 Multi Currency Wallet for Merchants,MANOJ SUBEDI,In Progress,8h,"Jan 1, 2026",20,MANOJ SUBEDI,,"Mar 26, 2026",Medium,Epic, ,In Progress,1d 16h
-60,GBP-2243,4.04 Live transaction Support ,MANOJ SUBEDI,In Progress,,"Jan 1, 2026",10,MANOJ SUBEDI,,"Mar 31, 2026",Medium,Epic, ,In Progress,1d 10h 1m
-2,GBP-2146,1.02 Get Paid,MANOJ SUBEDI,Testing,,"Feb 2, 2026",20,MANOJ SUBEDI,,"Jun 30, 2026",Medium,Epic, ,Testing,16h`;
-
-(function autoLoad() {
-  try {
-    const { issues, raw } = parseCSVData(EMBEDDED_CSV);
-    buildMissingPanel(raw);
-    STATE.set(issues);
-    const t = new Date();
-    setStatus(
-      `✅ Auto-loaded ${raw.length} issues from CSV · ${Object.keys(STATE.epicMap).length} projects · ${Object.keys(STATE.devMap).length} developers — Use "Load CSV" to refresh with a new export.`,
-      'success'
-    );
-  } catch(e) {
-    setStatus(`⚠️ Auto-load failed: ${e.message}`, 'warn');
-  }
-})();
 </script>
 </body>
 </html>
